@@ -29,7 +29,7 @@ public class MySQLChatMemory implements ChatMemory {
         memory.put(userId, content);
         if (content instanceof UserMessage userMessage) {
             messageMapper.insert(fun.aiboot.entity.Message.builder()
-                    .conversationId(sessionManager.getSession(userId).getId())
+                    .conversationId(sessionManager.getSessionId(userId))
                     .sender("user")
                     .type("text")
                     .content(userMessage.getText())

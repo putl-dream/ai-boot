@@ -1,10 +1,11 @@
-package fun.aiboot.service;
+package fun.aiboot.services;
 
 import fun.aiboot.communication.domain.BaseMessage;
 import fun.aiboot.communication.domain.ChatMessage;
 import fun.aiboot.communication.server.MessageHandler;
 import fun.aiboot.communication.server.MessagePublisher;
 import fun.aiboot.dialogue.llm.LLMService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,9 @@ import java.util.UUID;
 @Service
 public class ChatService implements MessageHandler {
 
-    @Autowired
+    @Resource
     private LLMService llmService;
-    @Autowired
+    @Resource
     private MessagePublisher messagePublisher;
 
     @Override
@@ -50,7 +51,7 @@ public class ChatService implements MessageHandler {
                     // 发送流式响应片段
                     ChatMessage chatMessage = new ChatMessage(
                             "AI Assistant",  // 或者从配置读取
-                            responseBuilder.toString(),  // 发送累积的完整内容
+                            chunk,  // 发送累积的完整内容
                             LocalDateTime.now(),
                             "text"
                     );

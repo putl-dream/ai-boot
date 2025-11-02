@@ -9,4 +9,5 @@ public interface SessionManager {
     void remove(String userId);
     WebSocketSession getSession(String userId);
     Collection<WebSocketSession> getAllSessions();
+    String getSessionId(String userId);
 }
