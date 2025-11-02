@@ -1,7 +1,7 @@
 package fun.aiboot.dialogue.llm.memory;
 
-import fun.aiboot.domain.Chat;
-import fun.aiboot.mapper.ChatMapper;
+import fun.aiboot.communication.server.SessionManager;
+import fun.aiboot.mapper.MessageMapper;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -16,26 +16,35 @@ import java.util.Map;
 @Component
 public class MySQLChatMemory implements ChatMemory {
 
+
     private final Map<String, Message> memory = new HashMap<>();
 
     @Resource
-    private ChatMapper chatMapper;
+    private MessageMapper messageMapper;
+    @Resource
+    private SessionManager sessionManager;
 
     @Override
     public void addMessage(String userId, Message content) {
         memory.put(userId, content);
         if (content instanceof UserMessage userMessage) {
-            chatMapper.insert(Chat.builder()
-                    .fromUser("user")
+            messageMapper.insert(fun.aiboot.entity.Message.builder()
+                    .conversationId(sessionManager.getSession(userId).getId())
+                    .sender("user")
+                    .type("text")
                     .content(userMessage.getText())
                     .build());
         } else if (content instanceof AssistantMessage assistantMessage) {
-            // 总结内容
+            // todo : 大模型输出的内容比较多，后面考虑对上下文进行总结总结内容
             String text = assistantMessage.getText();
-            chatMapper.insert(Chat.builder()
-                    .fromUser("assistant")
-                    .content(assistantMessage.getText())
-                    .build());
+            messageMapper.insert(
+                    fun.aiboot.entity.Message.builder()
+                            .conversationId(sessionManager.getSession(userId).getId())
+                            .sender("ai")
+                            .type("text")
+                            .content(text)
+                            .build()
+            );
         } else {
             throw new IllegalArgumentException("Unsupported message type: " + content.getClass().getName());
         }

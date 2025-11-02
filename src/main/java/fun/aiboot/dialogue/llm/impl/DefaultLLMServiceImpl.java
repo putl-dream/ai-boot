@@ -1,6 +1,8 @@
 package fun.aiboot.dialogue.llm.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import fun.aiboot.communication.server.SessionManager;
+import fun.aiboot.context.UserContext;
 import fun.aiboot.context.UserContextHolder;
 import fun.aiboot.dialogue.llm.LLMService;
 import fun.aiboot.dialogue.llm.factory.ChatModelFactory;
@@ -10,6 +12,7 @@ import fun.aiboot.dialogue.llm.tool.ToolsGlobalRegistry;
 import fun.aiboot.entity.Model;
 import fun.aiboot.service.ModelService;
 import io.micrometer.common.util.StringUtils;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
@@ -20,7 +23,7 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.socket.WebSocketSession;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -35,12 +38,13 @@ public class DefaultLLMServiceImpl implements LLMService {
     private final ModelService modelService;
     private final ToolCallingManager toolCallingManager;
     Map<String, ChatModel> chatModelMap = new ConcurrentHashMap<>();
+    private final SessionManager sessionManager;
 
 
     /**
      * 初始化模型
      */
-    @PostMapping
+    @PostConstruct
     public void init() {
         List<Model> models = modelService.getBaseMapper().selectList(Wrappers.lambdaQuery(Model.class));
         for (Model model : models) {
@@ -52,25 +56,32 @@ public class DefaultLLMServiceImpl implements LLMService {
                     .build()
                     .takeChatModel(ModelFrameworkType.dashscope);
             chatModelMap.put(model.getId(), chatModel);
+            log.info("{} 初始化模型成功", model.getName());
         }
     }
 
 
     public DefaultLLMServiceImpl(ToolCallingManager toolCallingManager,
                                  ToolsGlobalRegistry toolsGlobalRegistry,
-                                 ChatMemory chatMemory, ModelService modelService) {
+                                 ChatMemory chatMemory,
+                                 ModelService modelService,
+                                 SessionManager sessionManager
+    ) {
         this.toolsGlobalRegistry = toolsGlobalRegistry;
         this.chatMemory = chatMemory;
         this.modelService = modelService;
         this.toolCallingManager = toolCallingManager;
+        this.sessionManager = sessionManager;
     }
 
     @Override
-    public String chat(String message) {
-        String userId = UserContextHolder.getUserId();
+    public String chat(String userId, String message) {
+        WebSocketSession session = sessionManager.getSession(userId);
+        UserContext userContext = (UserContext) session.getAttributes().get("userContext");
+
         Prompt prompt = buildPrompt(userId, message);
 
-        ChatResponse call = chatModelMap.get(UserContextHolder.getCurrentModelId()).call(prompt);
+        ChatResponse call = chatModelMap.get(userContext.getCurrentModelId()).call(prompt);
         String text = call.getResult().getOutput().getText();
         text = StringUtils.isBlank(text) ? "" : text;
 
@@ -80,12 +91,15 @@ public class DefaultLLMServiceImpl implements LLMService {
 
     @Override
     public Flux<String> stream(String userId, String message) {
-        Prompt prompt = buildPrompt(userId, message);
+        WebSocketSession session = sessionManager.getSession(userId);
+        UserContext userContext = (UserContext) session.getAttributes().get("userContext");
+
+        Prompt prompt = buildPrompt(userContext.getUserId(), message);
 
         // 使用 StringBuilder 收集完整响应
         StringBuilder completeResponse = new StringBuilder();
 
-        return chatModelMap.get(UserContextHolder.getCurrentModelId()).stream(prompt)
+        return chatModelMap.get(userContext.getCurrentModelId()).stream(prompt)
                 .map(chatResponse -> {
                     // 提取当前片段的文本
                     String chunk = chatResponse.getResult().getOutput().getText();
