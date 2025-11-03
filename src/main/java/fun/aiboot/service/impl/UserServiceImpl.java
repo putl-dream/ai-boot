@@ -60,7 +60,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .userId(user.getId())
                 .username(username)
                 .roles(List.of("ROLE_USER"))
-                .roleModelIds(List.of("default"))
+                .roleModelIds(List.of("default","default1"))
                 .roleToolIds(List.of("default"))
                 .currentModelId("default")
                 .enabledToolIds(List.of("default"))
