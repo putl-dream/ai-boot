@@ -8,4 +8,6 @@ public interface LLMService {
     String chat(String userId, String message);
 
     Flux<String> stream(String userId, String message);
+
+    void refreshModel(String userId);
 }
