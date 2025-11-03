@@ -1,12 +1,15 @@
 package fun.aiboot.dialogue.llm.memory;
 
 import fun.aiboot.communication.server.SessionManager;
+import fun.aiboot.communication.server.WebSocketConstants;
 import fun.aiboot.mapper.MessageMapper;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,9 +30,13 @@ public class MySQLChatMemory implements ChatMemory {
     @Override
     public void addMessage(String userId, Message content) {
         memory.put(userId, content);
+        WebSocketSession session = sessionManager.getSession(userId);
+        String conversationId = String.valueOf(session.getAttributes().get(WebSocketConstants.Conversation_Id));
+        Assert.notNull(conversationId, "conversationId is null");
+
         if (content instanceof UserMessage userMessage) {
             messageMapper.insert(fun.aiboot.entity.Message.builder()
-                    .conversationId(sessionManager.getSessionId(userId))
+                    .conversationId(conversationId)
                     .sender("user")
                     .type("text")
                     .content(userMessage.getText())
@@ -37,9 +44,8 @@ public class MySQLChatMemory implements ChatMemory {
         } else if (content instanceof AssistantMessage assistantMessage) {
             // todo : 大模型输出的内容比较多，后面考虑对上下文进行总结总结内容
             String text = assistantMessage.getText();
-            messageMapper.insert(
-                    fun.aiboot.entity.Message.builder()
-                            .conversationId(sessionManager.getSession(userId).getId())
+            messageMapper.insert(fun.aiboot.entity.Message.builder()
+                            .conversationId(conversationId)
                             .sender("ai")
                             .type("text")
                             .content(text)
