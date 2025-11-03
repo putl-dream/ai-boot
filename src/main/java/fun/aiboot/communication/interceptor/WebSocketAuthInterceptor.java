@@ -11,6 +11,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
@@ -52,6 +53,8 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
             // 将用户信息存储到attributes中,可以跨线程使用
             attributes.put(WebSocketConstants.User_Context, context);
             attributes.put(WebSocketConstants.Conversation_Id, conversationId);
+            Assert.notNull(context, "User information cannot be empty");
+            log.info("【{}】The user identity verification has been passed", context.getUsername());
             return true;
         }
         return false;

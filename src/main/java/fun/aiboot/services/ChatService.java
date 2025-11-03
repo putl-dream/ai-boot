@@ -74,7 +74,7 @@ public class ChatService implements MessageHandler {
                     messagePublisher.sendToUser(userId, errorMessage);
                 },
                 () -> {
-                    log.info("Stream completed 响应：\n{}", responseBuilder);
+                    log.info("Stream completed response：\n{}", responseBuilder);
                     // 发送完成标记
                     ChatMessage completeMessage = new ChatMessage(
                             "AI Assistant",

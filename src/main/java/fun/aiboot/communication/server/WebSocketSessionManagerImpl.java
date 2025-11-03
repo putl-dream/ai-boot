@@ -34,11 +34,11 @@ public class WebSocketSessionManagerImpl implements SessionManager {
          * 消息发送时，会话ID会保存在 session 中，通过 sessionId 获取会话ID记录到Message表中
          */
         String conversationId = String.valueOf(session.getAttributes().get(WebSocketConstants.Conversation_Id));
-        if (StringUtils.isNotEmpty(conversationId)) {
+        if (StringUtils.isEmpty(conversationId)) {
             throw new AuthorizationException("会话id未找到");
         }
         sessions.put(userId, session);
-        log.info("用户 {} 会话创建成功：{}", userId, conversationId);
+        log.info("【{}】建立会话成功", conversationId);
     }
 
     @Override
