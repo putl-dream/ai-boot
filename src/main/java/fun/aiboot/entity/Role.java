@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
@@ -20,6 +22,8 @@ import java.time.LocalDateTime;
  * @author putl
  * @since 2025-10-30
  */
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Data
 @EqualsAndHashCode(callSuper = false)
