@@ -1,4 +1,4 @@
-package fun.aiboot.services;
+package fun.aiboot.wsservice;
 
 import fun.aiboot.communication.domain.BaseMessage;
 import fun.aiboot.communication.domain.ChatMessage;

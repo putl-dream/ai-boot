@@ -1,10 +1,11 @@
-package fun.aiboot.services;
+package fun.aiboot.services.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import fun.aiboot.context.UserContext;
 import fun.aiboot.entity.User;
 import fun.aiboot.exception.BusinessException;
 import fun.aiboot.service.UserService;
+import fun.aiboot.services.AuthService;
 import fun.aiboot.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +19,11 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class CertificationService {
+public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
+    @Override
     public String login(String username, String password) {
         Assert.notNull(username, "username cannot be null");
         Assert.notNull(password, "password cannot be null");
@@ -56,7 +58,7 @@ public class CertificationService {
                 .build());
     }
 
-
+    @Override
     public void register(String username, String password, String email) {
         Assert.notNull(username, "username cannot be null");
         Assert.notNull(password, "password cannot be null");
@@ -82,10 +84,13 @@ public class CertificationService {
                 .createTime(LocalDateTime.now())
                 .build());
 
+        // 默认赋权
+
+
         log.info("用户注册成功：{}", username);
     }
 
-
+    @Override
     public void updatePassword(String username, String oldPassword, String newPassword) {
         Assert.notNull(username, "username cannot be null");
         Assert.notNull(oldPassword, "oldPassword cannot be null");
@@ -115,7 +120,7 @@ public class CertificationService {
         log.info("用户密码修改成功：{}", username);
     }
 
-
+    @Override
     public void forgetPassword(String username, String email) {
         Assert.notNull(username, "username cannot be null");
         Assert.notNull(email, "email cannot be null");
@@ -140,9 +145,5 @@ public class CertificationService {
 
         log.info("用户密码重置成功：{}, 新密码：{}", username, newPassword);
         // 实际应该发送邮件通知用户
-    }
-
-    public User getUser(String id) {
-        return this.userService.getById(id);
     }
 }

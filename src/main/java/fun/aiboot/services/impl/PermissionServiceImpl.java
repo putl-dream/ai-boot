@@ -1,9 +1,9 @@
-package fun.aiboot.service.impl;
+package fun.aiboot.services.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import fun.aiboot.entity.*;
 import fun.aiboot.mapper.*;
-import fun.aiboot.service.PermissionService;
+import fun.aiboot.services.PermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

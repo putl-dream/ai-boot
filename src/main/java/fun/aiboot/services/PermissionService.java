@@ -1,4 +1,4 @@
-package fun.aiboot.service;
+package fun.aiboot.services;
 
 import java.util.List;
 

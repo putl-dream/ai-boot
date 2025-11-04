@@ -2,10 +2,9 @@ package fun.aiboot.aspect;
 
 import fun.aiboot.annotation.RequireRole;
 import fun.aiboot.annotation.RequireTool;
-import fun.aiboot.context.UserContext;
 import fun.aiboot.context.UserContextHolder;
 import fun.aiboot.exception.AuthorizationException;
-import fun.aiboot.service.PermissionService;
+import fun.aiboot.services.PermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * 权限校验切面

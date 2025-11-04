@@ -396,7 +396,7 @@ public class WeatherFunction implements GlobalFunction {
 #### ChatService
 聊天服务，处理聊天消息并调用 AI 模型生成响应。
 
-**位置**: `fun.aiboot.services.ChatService`
+**位置**: `fun.aiboot.wsservice.ChatService`
 
 **功能**:
 - 接收用户消息

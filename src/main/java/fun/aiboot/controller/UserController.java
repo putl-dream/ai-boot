@@ -22,14 +22,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
-    private final CertificationService userService;
+    private final CertificationService certificationService;
 
     /**
      * 用户登录
      */
     @PostMapping("/login")
     public Result<String> login(@RequestBody LoginRequest request) {
-        String token = userService.login(request.getUsername(), request.getPassword());
+        String token = certificationService.login(request.getUsername(), request.getPassword());
         return Result.success("登录成功", token);
     }
 
@@ -38,7 +38,7 @@ public class UserController {
      */
     @PostMapping("/register")
     public Result<String> register(@RequestBody RegisterRequest request) {
-        userService.register(request.getUsername(), request.getPassword(), request.getEmail());
+        certificationService.register(request.getUsername(), request.getPassword(), request.getEmail());
         return Result.success("注册成功");
     }
 
@@ -48,7 +48,7 @@ public class UserController {
     @GetMapping("/info")
     public Result<User> getUserInfo() {
         String userId = UserContextHolder.getUserId();
-        User user = userService.getUser(userId);
+        User user = certificationService.getUser(userId);
         // 清除密码字段
         user.setPassword(null);
         return Result.success(user);
@@ -60,7 +60,7 @@ public class UserController {
     @PostMapping("/password")
     public Result<String> updatePassword(@RequestBody UpdatePasswordRequest request) {
         String username = UserContextHolder.getUsername();
-        userService.updatePassword(username, request.getOldPassword(), request.getNewPassword());
+        certificationService.updatePassword(username, request.getOldPassword(), request.getNewPassword());
         return Result.success("密码修改成功");
     }
 
@@ -69,7 +69,7 @@ public class UserController {
      */
     @PostMapping("/forget-password")
     public Result<String> forgetPassword(@RequestBody ForgetPasswordRequest request) {
-        userService.forgetPassword(request.getUsername(), request.getEmail());
+        certificationService.forgetPassword(request.getUsername(), request.getEmail());
         return Result.success("密码重置成功，请查收邮件");
     }
 
