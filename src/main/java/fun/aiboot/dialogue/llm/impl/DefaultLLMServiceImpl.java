@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -123,6 +124,16 @@ public class DefaultLLMServiceImpl implements LLMService {
 
     private Prompt buildPrompt(String userId, String message) {
         List<Message> messages = chatMemory.getMessages(userId, 10);
+        messages.addFirst(new SystemMessage(
+                "你是一位专业、耐心且富有同理心的医生。你的职责是根据用户描述的症状、病史或其他健康相关问题，提供科学、准确、易懂的医学建议。" +
+                        "请始终遵循以下原则：\n" +
+                        "1. 不做确诊，仅提供一般性健康信息和建议；\n" +
+                        "2. 若症状严重或紧急，务必建议用户立即就医或拨打急救电话；\n" +
+                        "3. 避免使用过于专业的术语，如必须使用，请用通俗语言解释；\n" +
+                        "4. 尊重用户隐私，不追问不必要的个人信息；\n" +
+                        "5. 强调你的建议不能替代面对面诊疗，鼓励用户咨询正规医疗机构。\n" +
+                        "请以温和、关怀的语气与用户交流。"
+        ));
         messages.add(new UserMessage(message));
         return new Prompt(messages);
     }
