@@ -1,8 +1,11 @@
 package fun.aiboot.services.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import fun.aiboot.entity.*;
 import fun.aiboot.mapper.*;
+import fun.aiboot.service.ModelService;
+import fun.aiboot.service.RoleModelService;
 import fun.aiboot.services.PermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +32,8 @@ public class PermissionServiceImpl implements PermissionService {
     private final UserToolMapper userToolMapper;
     private final ToolMapper toolMapper;
     private final RoleToolMapper roleToolMapper;
+    private final ModelService modelService;
+    private final RoleModelService roleModelService;
 
     @Override
     public boolean hasRole(String userId, List<String> roleNames, boolean requireAll) {
@@ -131,6 +136,17 @@ public class PermissionServiceImpl implements PermissionService {
         // 返回工具名称列表
         return tools.stream()
                 .map(Tool::getName)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<String> getUserModels(String userId) {
+        List<String> userRoles = getUserRoles(userId);
+        List<RoleModel> roleModels = roleModelService.getBaseMapper().selectList(Wrappers.lambdaQuery(RoleModel.class)
+                .in(RoleModel::getRoleId, userRoles)
+        );
+        return roleModels.stream()
+                .map(RoleModel::getModelId)
                 .collect(Collectors.toList());
     }
 }

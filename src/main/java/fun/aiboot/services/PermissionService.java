@@ -45,4 +45,12 @@ public interface PermissionService {
      * @return 工具名称列表
      */
     List<String> getUserTools(String userId);
+
+    /**
+     * 获取用户所有角色的模型ID列表
+     *
+     * @param userId 用户ID
+     * @return 模型ID列表
+     */
+    List<String> getUserModels(String userId);
 }

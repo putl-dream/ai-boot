@@ -40,9 +40,10 @@ public class DefaultLLMServiceImpl implements LLMService {
     private final ToolsGlobalRegistry toolsGlobalRegistry;
     private final ModelService modelService;
     private final ToolCallingManager toolCallingManager;
-    Map<String, ChatModel> chatModelMap = new ConcurrentHashMap<>();
     private final SessionManager sessionManager;
     private final UserService userService;
+
+    private final Map<String, ChatModel> chatModelMap = new ConcurrentHashMap<>();
 
     private ChatModel initModel(Model model) {
         ChatModel chatModel = ChatModelFactory.builder()

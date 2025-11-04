@@ -49,11 +49,6 @@ public class UserContextHolder {
         return context == null ? null : context.getCurrentModelId();
     }
 
-    public static List<String> getEnabledToolIds() {
-        UserContext context = get();
-        return context == null ? null : context.getEnabledToolIds();
-    }
-
     public static LocalDateTime getLastUpdated() {
         UserContext context = get();
         return context == null ? null : context.getLastUpdated();

@@ -6,6 +6,7 @@ import fun.aiboot.entity.User;
 import fun.aiboot.exception.BusinessException;
 import fun.aiboot.service.UserService;
 import fun.aiboot.services.AuthService;
+import fun.aiboot.services.PermissionService;
 import fun.aiboot.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
+    private final PermissionService permissionService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
@@ -45,15 +47,18 @@ public class AuthServiceImpl implements AuthService {
         }
 
         log.info("用户登录成功：{}", username);
+        List<String> userRoles = permissionService.getUserRoles(user.getId());
+        List<String> userTools = permissionService.getUserTools(user.getId());
+        List<String> userModels = permissionService.getUserModels(user.getId());
+
         // 生成token
         return JwtUtil.generateJwt(UserContext.builder()
                 .userId(user.getId())
                 .username(username)
-                .roles(List.of("ROLE_USER"))
-                .roleModelIds(List.of("default", "default1"))
-                .roleToolIds(List.of("default"))
-                .currentModelId("default")
-                .enabledToolIds(List.of("default"))
+                .roles(userRoles)
+                .roleModelIds(userModels)
+                .roleToolIds(userTools)
+                .currentModelId(user.getModelId())
                 .lastUpdated(LocalDateTime.now())
                 .build());
     }

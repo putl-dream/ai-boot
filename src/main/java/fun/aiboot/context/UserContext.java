@@ -27,7 +27,6 @@ public class UserContext {
 
     // 用户动态上下文（运行态部分）
     private String currentModelId;
-    private List<String> enabledToolIds;
 
     // 缓存时间戳（用于刷新）
     private LocalDateTime lastUpdated;

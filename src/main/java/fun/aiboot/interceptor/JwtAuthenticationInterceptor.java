@@ -48,7 +48,7 @@ public class JwtAuthenticationInterceptor implements HandlerInterceptor {
             // 将用户信息存储到ThreadLocal中
             UserContextHolder.set(userContext);
 
-            log.debug("用户赋权成功：角色={}，工具={}，支持模型{}", userContext.getRoles(), userContext.getEnabledToolIds(), userContext.getRoleModelIds());
+            log.debug("用户赋权成功：角色={}，支持模型{}", userContext.getRoles(), userContext.getRoleModelIds());
             return true;
         } catch (Exception e) {
             log.error("token解析失败：{}", e.getMessage());
