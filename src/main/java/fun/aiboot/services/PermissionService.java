@@ -9,6 +9,10 @@ import java.util.List;
  * @since 2025-10-30
  */
 public interface PermissionService {
+    /**
+     * 用户创建默认角色和工具权限
+     */
+    void createDefaultRole(String userId);
 
     /**
      * 检查用户是否拥有指定角色

@@ -6,10 +6,14 @@ import fun.aiboot.entity.*;
 import fun.aiboot.mapper.*;
 import fun.aiboot.service.ModelService;
 import fun.aiboot.service.RoleModelService;
+import fun.aiboot.service.RoleToolService;
+import fun.aiboot.service.UserRoleService;
 import fun.aiboot.services.PermissionService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +38,82 @@ public class PermissionServiceImpl implements PermissionService {
     private final RoleToolMapper roleToolMapper;
     private final ModelService modelService;
     private final RoleModelService roleModelService;
+    private final UserRoleService userRoleService;
+    private final RoleToolService roleToolService;
+
+    @PostConstruct
+    public void init() {
+        // 创建默认角色
+        Role defaultRole = roleMapper.selectOne(Wrappers.lambdaQuery(Role.class).eq(Role::getId, "default").last("LIMIT 1"));
+        if (defaultRole == null) {
+            defaultRole = Role.builder()
+                    .id("default")
+                    .name("user")
+                    .description("普通用户")
+                    .build();
+            roleMapper.insert(defaultRole);
+        }
+
+        // 创建默认模型
+        Model defaultModel = modelService.getBaseMapper().selectOne(Wrappers.lambdaQuery(Model.class).eq(Model::getId, "default").last("LIMIT 1"));
+        if (defaultModel == null) {
+            defaultModel = Model.builder()
+                    .id("default")
+                    .name("qwen-plus")
+                    .provider("dashscope")
+                    .maxTokens(1024)
+                    .description("默认模型")
+                    .build();
+            modelService.getBaseMapper().insert(defaultModel);
+        } else {
+            defaultModel.setModelKey("sk-1111111111111111");
+        }
+
+        // 创建默认工具
+        Tool defaultTool = toolMapper.selectOne(Wrappers.lambdaQuery(Tool.class).eq(Tool::getId, "default").last("LIMIT 1"));
+        if (defaultTool == null) {
+            defaultTool = Tool.builder()
+                    .id("default")
+                    .name("default")
+                    .type("function")
+                    .config("{}")
+                    .description("默认工具")
+                    .build();
+            toolMapper.insert(defaultTool);
+        }
+        // 为角色赋权
+        RoleTool roleToolDefault = roleToolService.getById("default");
+        if (roleToolDefault == null) {
+            roleToolService.save(RoleTool.builder()
+                    .id("default")
+                    .roleId(defaultRole.getId())
+                    .toolId(defaultTool.getId())
+                    .build());
+        }
+
+        RoleModel roleModelDefault = roleModelService.getById("default");
+        if (roleModelDefault == null) {
+            roleModelService.save(RoleModel.builder()
+                    .id("default")
+                    .roleId(defaultRole.getId())
+                    .modelId(defaultModel.getId())
+                    .build());
+        }
+        log.info("初始化默认角色: {}", defaultRole);
+        log.info("初始化默认模型: {}", defaultModel);
+        log.info("初始化默认工具: {}", defaultTool);
+    }
+
+
+    @Override
+    public void createDefaultRole(String userId) {
+        // 为用户创建默认角色和工具权限
+        Role defaultRole = roleMapper.selectOne(Wrappers.lambdaQuery(Role.class).eq(Role::getName, "default").last("LIMIT 1"));
+        userRoleService.save(UserRole.builder()
+                .userId(userId)
+                .roleId(defaultRole.getId())
+                .build());
+    }
 
     @Override
     public boolean hasRole(String userId, List<String> roleNames, boolean requireAll) {

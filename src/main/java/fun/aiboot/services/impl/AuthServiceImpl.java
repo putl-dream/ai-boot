@@ -81,16 +81,18 @@ public class AuthServiceImpl implements AuthService {
         // 加密密码
         String encodedPassword = passwordEncoder.encode(password);
 
-        this.userService.save(User.builder()
+        User newUser = User.builder()
                 .username(username)
                 .password(encodedPassword)
                 .email(email)
                 .modelId("default")
                 .createTime(LocalDateTime.now())
-                .build());
+                .build();
+
+        this.userService.save(newUser);
 
         // 默认赋权
-
+        permissionService.createDefaultRole(newUser.getId());
 
         log.info("用户注册成功：{}", username);
     }
