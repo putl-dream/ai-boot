@@ -1,20 +1,20 @@
 package fun.aiboot.service;
 
-import fun.aiboot.entity.Message;
+import fun.aiboot.entity.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-public class MessageServiceTest {
+public class UserRoleServiceTest {
     @Autowired
-    private MessageService messageService;
+    private UserRoleService userRoleService;
 
     @Test
     void test() {
-        messageService.save(Message.builder()
-                .content("hello")
+        userRoleService.save(UserRole.builder()
+                .userId("1")
+                .roleId("1")
                 .build());
     }
-
 }

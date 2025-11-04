@@ -1,20 +1,17 @@
 package fun.aiboot.service;
 
-import fun.aiboot.entity.Message;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-public class MessageServiceTest {
+public class ToolServiceTest {
+
     @Autowired
-    private MessageService messageService;
+    private ToolService toolService;
 
     @Test
     void test() {
-        messageService.save(Message.builder()
-                .content("hello")
-                .build());
-    }
 
+    }
 }

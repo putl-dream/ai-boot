@@ -1,20 +1,20 @@
 package fun.aiboot.service;
 
-import fun.aiboot.entity.Message;
+import fun.aiboot.entity.RoleTool;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-public class MessageServiceTest {
+public class RoleToolServiceTest {
     @Autowired
-    private MessageService messageService;
+    private RoleToolService roleToolService;
 
     @Test
     void test() {
-        messageService.save(Message.builder()
-                .content("hello")
+        roleToolService.save(RoleTool.builder()
+                .roleId("1")
+                .toolId("1")
                 .build());
     }
-
 }
