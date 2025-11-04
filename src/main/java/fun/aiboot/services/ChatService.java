@@ -7,7 +7,6 @@ import fun.aiboot.communication.server.MessagePublisher;
 import fun.aiboot.dialogue.llm.LLMService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -27,14 +26,6 @@ public class ChatService implements MessageHandler {
     public String getType() {
         return "chat";
     }
-
-//    @Override
-//    public void handleMessage(String userId, BaseMessage message) {
-//        ChatMessage msg = (ChatMessage) message;
-//        String response = llmService.chat(userId, msg.getContent());
-//        ChatMessage chatMessage = new ChatMessage(msg.getFrom(), msg.getTo(), response, LocalDateTime.now(), "text");
-//        messagePublisher.sendToUser(userId, chatMessage);
-//    }
 
     @Override
     public void handleMessage(String userId, BaseMessage message) {
@@ -89,6 +80,4 @@ public class ChatService implements MessageHandler {
                 }
         );
     }
-
-
 }
