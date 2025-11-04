@@ -1,5 +1,6 @@
 package fun.aiboot.dialogue.llm.impl;
 
+import fun.aiboot.communication.server.MessagePublisher;
 import fun.aiboot.communication.server.SessionManager;
 import fun.aiboot.communication.server.WebSocketConstants;
 import fun.aiboot.context.UserContext;
@@ -42,6 +43,7 @@ public class DefaultLLMServiceImpl implements LLMService {
     private final ToolCallingManager toolCallingManager;
     private final SessionManager sessionManager;
     private final UserService userService;
+    private final MessagePublisher messagePublisher;
 
     private final Map<String, ChatModel> chatModelMap = new ConcurrentHashMap<>();
 
@@ -110,6 +112,7 @@ public class DefaultLLMServiceImpl implements LLMService {
         chatModelMap.remove(modelId);
 
         if (!userContext.getRoleModelIds().contains(modelId)) {
+            messagePublisher.sendToUser(userId, "您当前暂无该模型权限");
             throw new AuthenticationException("用户没有权限使用此模型");
         }
 
@@ -141,6 +144,7 @@ public class DefaultLLMServiceImpl implements LLMService {
         String modelId = user.getModelId();
 
         if (!userContext.getRoleModelIds().contains(modelId)) {
+            messagePublisher.sendToUser(userId, "您当前暂无该模型权限");
             throw new AuthenticationException("用户没有权限使用此模型");
         }
 

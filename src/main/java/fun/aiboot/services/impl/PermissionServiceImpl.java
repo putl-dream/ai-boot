@@ -108,7 +108,7 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public void createDefaultRole(String userId) {
         // 为用户创建默认角色和工具权限
-        Role defaultRole = roleMapper.selectOne(Wrappers.lambdaQuery(Role.class).eq(Role::getName, "default").last("LIMIT 1"));
+        Role defaultRole = roleMapper.selectOne(Wrappers.lambdaQuery(Role.class).eq(Role::getId, "default").last("LIMIT 1"));
         userRoleService.save(UserRole.builder()
                 .userId(userId)
                 .roleId(defaultRole.getId())
@@ -221,7 +221,10 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public List<String> getUserModels(String userId) {
-        List<String> userRoles = getUserRoles(userId);
+        List<UserRole> userRoleList = userRoleMapper.selectList(
+                new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, userId)
+        );
+        List<String> userRoles = userRoleList.stream().map(UserRole::getRoleId).toList();
         List<RoleModel> roleModels = roleModelService.getBaseMapper().selectList(Wrappers.lambdaQuery(RoleModel.class)
                 .in(RoleModel::getRoleId, userRoles)
         );
