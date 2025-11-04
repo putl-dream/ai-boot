@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+// 在 Spring Boot 测试类或方法上使用 @Transactional 时，Spring 会 自动回滚事务，无论是否出错！
 @Transactional
 public class RoleServiceTest {
     @Autowired
@@ -17,8 +18,8 @@ public class RoleServiceTest {
     @Test
     void testSaveRole() {
         Role role = Role.builder()
-                .name("admin")
-                .description("Administrator role")
+                .name("vip")
+                .description("vip role")
                 .build();
         
         boolean saved = roleService.save(role);
@@ -50,7 +51,7 @@ public class RoleServiceTest {
                 .build();
         
         assertDoesNotThrow(() -> {
-            roleService.createRole(role);
+            roleService.save(role);
         });
     }
 }

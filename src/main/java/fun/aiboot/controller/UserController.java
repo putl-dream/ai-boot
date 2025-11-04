@@ -5,7 +5,9 @@ import fun.aiboot.annotation.RequireTool;
 import fun.aiboot.common.Result;
 import fun.aiboot.context.UserContextHolder;
 import fun.aiboot.entity.User;
-import fun.aiboot.services.CertificationService;
+
+import fun.aiboot.service.UserService;
+import fun.aiboot.services.AuthService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +24,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
-    private final CertificationService certificationService;
+    private final AuthService authService;
+    private final UserService userService;
 
     /**
      * 用户登录
      */
     @PostMapping("/login")
     public Result<String> login(@RequestBody LoginRequest request) {
-        String token = certificationService.login(request.getUsername(), request.getPassword());
+        String token = authService.login(request.getUsername(), request.getPassword());
         return Result.success("登录成功", token);
     }
 
@@ -38,7 +41,7 @@ public class UserController {
      */
     @PostMapping("/register")
     public Result<String> register(@RequestBody RegisterRequest request) {
-        certificationService.register(request.getUsername(), request.getPassword(), request.getEmail());
+        authService.register(request.getUsername(), request.getPassword(), request.getEmail());
         return Result.success("注册成功");
     }
 
@@ -48,7 +51,7 @@ public class UserController {
     @GetMapping("/info")
     public Result<User> getUserInfo() {
         String userId = UserContextHolder.getUserId();
-        User user = certificationService.getUser(userId);
+        User user = userService.getById(userId);
         // 清除密码字段
         user.setPassword(null);
         return Result.success(user);
@@ -60,7 +63,7 @@ public class UserController {
     @PostMapping("/password")
     public Result<String> updatePassword(@RequestBody UpdatePasswordRequest request) {
         String username = UserContextHolder.getUsername();
-        certificationService.updatePassword(username, request.getOldPassword(), request.getNewPassword());
+        authService.updatePassword(username, request.getOldPassword(), request.getNewPassword());
         return Result.success("密码修改成功");
     }
 
@@ -69,7 +72,7 @@ public class UserController {
      */
     @PostMapping("/forget-password")
     public Result<String> forgetPassword(@RequestBody ForgetPasswordRequest request) {
-        certificationService.forgetPassword(request.getUsername(), request.getEmail());
+        authService.forgetPassword(request.getUsername(), request.getEmail());
         return Result.success("密码重置成功，请查收邮件");
     }
 
