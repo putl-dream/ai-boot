@@ -3,10 +3,9 @@ package fun.aiboot.controller;
 import fun.aiboot.annotation.RequireRole;
 import fun.aiboot.annotation.RequireTool;
 import fun.aiboot.common.Result;
-import fun.aiboot.context.UserContext;
 import fun.aiboot.context.UserContextHolder;
 import fun.aiboot.entity.User;
-import fun.aiboot.service.UserService;
+import fun.aiboot.services.CertificationService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,8 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
-
-    private final UserService userService;
+    private final CertificationService userService;
 
     /**
      * 用户登录
@@ -50,7 +48,7 @@ public class UserController {
     @GetMapping("/info")
     public Result<User> getUserInfo() {
         String userId = UserContextHolder.getUserId();
-        User user = userService.getUserInfo(userId);
+        User user = userService.getUser(userId);
         // 清除密码字段
         user.setPassword(null);
         return Result.success(user);
