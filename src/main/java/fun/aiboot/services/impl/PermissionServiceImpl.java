@@ -2,6 +2,7 @@ package fun.aiboot.services.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import fun.aiboot.dialogue.llm.config.ModelConfig;
 import fun.aiboot.entity.*;
 import fun.aiboot.mapper.*;
 import fun.aiboot.service.ModelService;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -231,5 +233,17 @@ public class PermissionServiceImpl implements PermissionService {
         return roleModels.stream()
                 .map(RoleModel::getModelId)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Model getRandomModel(String userId) {
+        List<String> userModels = getUserModels(userId);
+        Random random = new Random();
+        return modelService.getById(userModels.get(random.nextInt(userModels.size())));
+    }
+
+    @Override
+    public boolean canAccessModel(String userId, ModelConfig config) {
+        return true;
     }
 }

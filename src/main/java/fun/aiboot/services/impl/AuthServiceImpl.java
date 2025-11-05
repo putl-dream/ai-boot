@@ -2,8 +2,13 @@ package fun.aiboot.services.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import fun.aiboot.context.UserContext;
+import fun.aiboot.dialogue.llm.ModelConfigManager;
+import fun.aiboot.dialogue.llm.config.ModelConfig;
+import fun.aiboot.entity.Model;
+import fun.aiboot.entity.SysPrompt;
 import fun.aiboot.entity.User;
 import fun.aiboot.exception.BusinessException;
+import fun.aiboot.service.SysPromptService;
 import fun.aiboot.service.UserService;
 import fun.aiboot.services.AuthService;
 import fun.aiboot.services.PermissionService;
@@ -16,6 +21,7 @@ import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 @Slf4j
 @Component
@@ -24,6 +30,8 @@ public class AuthServiceImpl implements AuthService {
     private final PermissionService permissionService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final SysPromptService sysPromptService;
+    private final ModelConfigManager modelConfigManager;
 
     @Override
     public String login(String username, String password) {

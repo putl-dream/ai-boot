@@ -29,55 +29,70 @@ public class ChatService implements MessageHandler {
 
     @Override
     public void handleMessage(String userId, BaseMessage message) {
-        ChatMessage msg = (ChatMessage) message;
-        Flux<String> stream = llmService.stream(userId, msg.getContent());
+        ChatMessage userMsg = (ChatMessage) message;
 
         // 生成唯一消息ID
         String messageId = UUID.randomUUID().toString();
-        StringBuilder responseBuilder = new StringBuilder();
 
-        stream.subscribe(
-                chunk -> {
-                    responseBuilder.append(chunk);
-                    // 发送流式响应片段
-                    ChatMessage chatMessage = new ChatMessage(
-                            "AI Assistant",  // 或者从配置读取
-                            chunk,  // 发送累积的完整内容
+        // 日志方便追踪
+        log.info("用户[{}]开始流式请求，消息ID={}，内容={}", userId, messageId, userMsg.getContent());
+
+        // 调用大模型服务
+        Flux<String> stream = llmService.stream(userId, "default", userMsg.getContent());
+
+        // 用于累积完整内容
+        StringBuilder accumulated = new StringBuilder();
+
+        // 启动流订阅（异步执行）
+        stream
+                .doOnNext(token -> {
+                    accumulated.append(token);
+
+                    ChatMessage chunkMessage = new ChatMessage(
+                            "AI Assistant",
+                            token, // 单个 token 增量
                             LocalDateTime.now(),
                             "text"
                     );
-                    chatMessage.setMessageId(messageId);
-                    chatMessage.setIsStreaming(true);
-                    chatMessage.setIsComplete(false);
-                    messagePublisher.sendToUser(userId, chatMessage);
-                },
-                error -> {
-                    log.error("Error in streaming: {}", error.getMessage());
-                    // 发送错误消息
-                    ChatMessage errorMessage = new ChatMessage(
+                    chunkMessage.setMessageId(messageId);
+                    chunkMessage.setIsStreaming(true);
+                    chunkMessage.setIsComplete(false);
+
+                    // ✅ 发送流式片段
+                    messagePublisher.sendToUser(userId, chunkMessage);
+                })
+                .doOnError(error -> {
+                    log.error("流式响应出错 userId={} messageId={} err={}", userId, messageId, error.getMessage());
+
+                    ChatMessage errorMsg = new ChatMessage(
                             "System",
-                            "抱歉，消息发送失败：" + error.getMessage(),
+                            "抱歉，生成响应时出现错误：" + error.getMessage(),
                             LocalDateTime.now(),
                             "system"
                     );
-                    errorMessage.setMessageId(messageId);
-                    errorMessage.setIsComplete(true);
-                    messagePublisher.sendToUser(userId, errorMessage);
-                },
-                () -> {
-                    log.info("Stream completed response：\n{}", responseBuilder);
-                    // 发送完成标记
-                    ChatMessage completeMessage = new ChatMessage(
+                    errorMsg.setMessageId(messageId);
+                    errorMsg.setIsStreaming(false);
+                    errorMsg.setIsComplete(true);
+                    messagePublisher.sendToUser(userId, errorMsg);
+                })
+                .doOnComplete(() -> {
+                    log.info("流式响应完成 userId={} messageId={} 总字数={}",
+                            userId, messageId, accumulated.length());
+
+                    ChatMessage completeMsg = new ChatMessage(
                             "AI Assistant",
-                            responseBuilder.toString(),
+                            accumulated.toString(),  // 全量内容
                             LocalDateTime.now(),
                             "text"
                     );
-                    completeMessage.setMessageId(messageId);
-                    completeMessage.setIsStreaming(false);
-                    completeMessage.setIsComplete(true);
-                    messagePublisher.sendToUser(userId, completeMessage);
-                }
-        );
+                    completeMsg.setMessageId(messageId);
+                    completeMsg.setIsStreaming(false);
+                    completeMsg.setIsComplete(true);
+
+                    // ✅ 发送最终消息
+                    messagePublisher.sendToUser(userId, completeMsg);
+                })
+                .subscribe(); // 启动流
     }
 }
+

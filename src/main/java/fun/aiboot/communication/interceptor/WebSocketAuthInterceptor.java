@@ -2,8 +2,15 @@ package fun.aiboot.communication.interceptor;
 
 import fun.aiboot.communication.server.WebSocketConstants;
 import fun.aiboot.context.UserContext;
+import fun.aiboot.dialogue.llm.ModelConfigManager;
+import fun.aiboot.dialogue.llm.config.ModelConfig;
+import fun.aiboot.entity.Model;
+import fun.aiboot.entity.SysPrompt;
+import fun.aiboot.service.SysPromptService;
+import fun.aiboot.services.PermissionService;
 import fun.aiboot.utils.JwtUtil;
 import io.micrometer.common.util.StringUtils;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatusCode;
@@ -20,6 +27,12 @@ import java.util.Map;
 @Slf4j
 @Component
 public class WebSocketAuthInterceptor implements HandshakeInterceptor {
+    @Resource
+    private ModelConfigManager modelConfigManager;
+    @Resource
+    private PermissionService permissionService;
+    @Resource
+    private SysPromptService sysPromptService;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
@@ -49,6 +62,22 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
                 log.warn("WebSocket authentication failed: invalid token");
                 response.setStatusCode(HttpStatusCode.valueOf(401));
             }
+
+            Assert.notNull(context, "User information cannot be empty");
+            SysPrompt sysPrompt = sysPromptService.getById(context.getCurrentModelId());
+
+            // 获取模型配置（modelname、key）,随机获取一个
+            Model randomModel = permissionService.getRandomModel(context.getUserId());
+
+            modelConfigManager.save(ModelConfig.builder()
+                    .id(sysPrompt.getId())
+                    .modelName(randomModel.getName())
+                    .apiKey(randomModel.getModelKey())
+                    .provider(randomModel.getProvider())
+                    .roleName(sysPrompt.getName())
+                    .exposedTools(null)
+                    .build());
+
 
             // 将用户信息存储到attributes中,可以跨线程使用
             attributes.put(WebSocketConstants.User_Context, context);

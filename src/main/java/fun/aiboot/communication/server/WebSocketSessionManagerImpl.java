@@ -17,11 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class WebSocketSessionManagerImpl implements SessionManager {
 
-    @Resource
-    ToolsGlobalRegistry toolsGlobalRegistry;
-    @Resource
-    ConversationService conversationService;
-
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
 

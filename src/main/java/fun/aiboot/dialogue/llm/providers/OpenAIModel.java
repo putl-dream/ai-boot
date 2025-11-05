@@ -1,6 +1,5 @@
 package fun.aiboot.dialogue.llm.providers;
 
-import fun.aiboot.dialogue.llm.tool.ToolsGlobalRegistry;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -17,10 +16,6 @@ import java.util.List;
 public class OpenAIModel implements ChatModel {
 
     private final OpenAiChatModel openAiChatModel;
-
-    public OpenAIModel(String modelName, String apiKey) {
-        this(modelName, apiKey, null, null);
-    }
 
     public OpenAIModel(String modelName, String apiKey, ToolCallingManager toolCallingManager, List<ToolCallback> toolCallbacks) {
         Assert.notNull(apiKey, "apiKey must not be null");
@@ -65,34 +60,30 @@ public class OpenAIModel implements ChatModel {
         private String modelName = "qwen-plus";
         private String apiKey;
         private ToolCallingManager toolCallingManager;
-        private ToolsGlobalRegistry toolsGlobalRegistry;
+        private List<ToolCallback> tools;
 
-        public Builder modelName(String modelName) {
+        public Builder withModel(String modelName) {
             this.modelName = modelName;
             return this;
         }
 
-        public Builder apiKey(String apiKey) {
+        public Builder withApiKey(String apiKey) {
             this.apiKey = apiKey;
             return this;
         }
 
-        public Builder toolCallingManager(ToolCallingManager toolCallingManager) {
+        public Builder withToolCallingManager(ToolCallingManager toolCallingManager) {
             this.toolCallingManager = toolCallingManager;
             return this;
         }
 
-        public Builder toolsGlobalRegistry(ToolsGlobalRegistry toolsGlobalRegistry) {
-            this.toolsGlobalRegistry = toolsGlobalRegistry;
+        public Builder withTools(List<ToolCallback> tools) {
+            this.tools = tools;
             return this;
         }
 
         public DashscopeModel build() {
-            List<ToolCallback> toolCallbacks = toolsGlobalRegistry.getAllFunctions().values().stream().toList();
-            if (toolCallingManager == null && toolCallbacks.isEmpty()) {
-                return new DashscopeModel(modelName, apiKey);
-            }
-            return new DashscopeModel(modelName, apiKey, toolCallingManager, toolCallbacks);
+            return new DashscopeModel(modelName, apiKey, toolCallingManager, tools);
         }
     }
 
