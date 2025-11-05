@@ -12,9 +12,13 @@
 - `Conversation` - 会话表
 - `Message` - 消息表
 - `Model` - 模型表
-- `Tool` - 工具表
-- `UserRole` - 用户角色关联表
+- `Role` - 角色表
+- `RoleModel` - 角色模型关联表
 - `RoleTool` - 角色工具关联表
+- `SysPrompt` - 系统提示词表
+- `Tool` - 工具表
+- `User` - 用户表
+- `UserRole` - 用户角色关联表
 - `UserTool` - 用户工具关联表
 
 路径：`src/main/java/fun/aiboot/entity/`
@@ -25,9 +29,13 @@
 - `ConversationMapper`
 - `MessageMapper`
 - `ModelMapper`
-- `ToolMapper`
-- `UserRoleMapper`
+- `RoleMapper`
+- `RoleModelMapper`
 - `RoleToolMapper`
+- `SysPromptMapper`
+- `ToolMapper`
+- `UserMapper`
+- `UserRoleMapper`
 - `UserToolMapper`
 
 路径：`src/main/java/fun/aiboot/mapper/`
@@ -168,6 +176,23 @@ String username = UserContext.getUsername();
 - 统一的异常处理
 
 路径：`src/main/java/fun/aiboot/service/impl/UserServiceImpl.java`
+
+### 6.3 新增服务类
+
+项目新增了以下服务类来支持完整的权限管理和业务逻辑：
+
+- `ConversationService` - 会话管理服务
+- `MessageService` - 消息管理服务
+- `ModelService` - 模型管理服务
+- `RoleService` - 角色管理服务
+- `RoleModelService` - 角色模型关联服务
+- `RoleToolService` - 角色工具关联服务
+- `SysPromptService` - 系统提示词服务
+- `ToolService` - 工具管理服务
+- `UserRoleService` - 用户角色关联服务
+- `UserToolService` - 用户工具关联服务
+
+路径：`src/main/java/fun/aiboot/service/` 和 `src/main/java/fun/aiboot/service/impl/`
 
 ### 7. 示例Controller
 

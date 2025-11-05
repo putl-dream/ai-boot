@@ -201,7 +201,7 @@ public class CustomService implements MessageHandler {
 
 **支持的模型**：
 - 阿里云通义千问 (Dashscope)
-- OpenAI（预留扩展）
+- OpenAI
 
 #### 使用示例
 
@@ -369,13 +369,15 @@ ai-boot/
 - [x] JWT 身份认证
 - [x] RBAC 权限管理
 - [x] 全局异常处理
-- [ ] OpenAI 模型集成
-- [ ] 对话历史管理
+- [x] OpenAI 模型集成
+- [x] 对话历史管理
+- [x] 消息持久化
 - [ ] 多轮对话上下文
-- [ ] 消息持久化
 - [ ] 集群部署支持
 - [ ] 更丰富的权限控制策略
 - [ ] 审计日志功能
+- [ ] RAG数据库支持
+- [ ] 后台管理系统
 
 ## 贡献
 

@@ -43,6 +43,10 @@ AI-Boot 是一个基于 Spring Boot 和 Spring AI 构建的智能对话系统框
 - **fastjson2**: JSON 序列化/反序列化
 - **lombok**: 简化 Java 代码
 - **spring-boot-starter-actuator**: 应用监控
+- **spring-boot-starter-aop**: AOP 支持
+- **spring-security-crypto**: 密码加密
+- **mysql-connector-java**: MySQL 数据库连接
+- **mybatis-plus-boot-starter**: MyBatis Plus ORM 框架
 
 ---
 
@@ -286,7 +290,7 @@ AI 模型工厂，使用工厂模式创建不同的 AI 模型实例。
 
 **支持的模型**:
 - `dashscope`: 阿里云通义千问
-- 预留扩展其他模型
+- `openai`: OpenAI 模型
 
 ```java
 @Component
@@ -299,6 +303,12 @@ public class ChatModelFactory {
                     .toolCallingManager(toolCallingManager)
                     .toolsGlobalRegistry(toolsGlobalRegistry)
                     .build();
+            case openai -> OpenAIModel.builder()
+                    .apiKey(System.getenv("OPENAI_API_KEY"))
+                    .modelName("gpt-4")
+                    .toolCallingManager(toolCallingManager)
+                    .toolsGlobalRegistry(toolsGlobalRegistry)
+                    .build();
         };
     }
 }
@@ -308,6 +318,16 @@ public class ChatModelFactory {
 阿里云通义千问模型的实现。
 
 **位置**: `fun.aiboot.dialogue.llm.providers.DashscopeModel`
+
+**功能**:
+- 同步对话调用
+- 流式对话支持
+- 工具调用集成
+
+##### OpenAIModel
+OpenAI 模型的实现。
+
+**位置**: `fun.aiboot.dialogue.llm.providers.OpenAIModel`
 
 **功能**:
 - 同步对话调用
@@ -389,9 +409,125 @@ public class WeatherFunction implements GlobalFunction {
 
 ---
 
-### 3. Business Layer (业务层)
+### 3. Security Module (安全模块)
 
-业务层实现具体的业务逻辑，通过实现 `MessageHandler` 接口处理不同类型的消息。
+安全模块提供完整的身份认证和权限管理功能，基于 JWT 和 RBAC 设计。
+
+#### 3.1 核心组件
+
+##### JwtUtil
+JWT 工具类，负责生成和解析 JWT token。
+
+**位置**: `fun.aiboot.utils.JwtUtil`
+
+**功能**:
+- 生成 JWT token
+- 验证和解析 JWT token
+- 提取用户信息
+
+##### JwtAuthenticationInterceptor
+JWT 认证拦截器，拦截所有请求并验证 JWT token。
+
+**位置**: `fun.aiboot.interceptor.JwtAuthenticationInterceptor`
+
+**特性**:
+- 从请求头`Authorization`中提取token
+- 支持`Bearer`前缀
+- 解析token并将用户信息存入ThreadLocal
+- 请求完成后自动清理上下文
+
+##### UserContext
+用户上下文，使用ThreadLocal存储当前登录用户信息。
+
+**位置**: `fun.aiboot.context.UserContext`
+
+```java
+String userId = UserContext.getUserId();
+String username = UserContext.getUsername();
+```
+
+##### PermissionService
+权限服务，负责权限校验核心逻辑。
+
+**位置**: `fun.aiboot.services.PermissionService`
+
+**功能**:
+- 检查用户是否拥有指定角色
+- 检查用户是否拥有指定工具权限
+- 获取用户的所有角色
+- 获取用户的所有工具（包括角色继承的工具）
+
+##### @RequireRole
+角色权限校验注解。
+
+**位置**: `fun.aiboot.annotation.RequireRole`
+
+```java
+// 需要拥有admin角色
+@RequireRole("admin")
+
+// 需要拥有admin或vip角色之一
+@RequireRole({"admin", "vip"})
+
+// 需要同时拥有admin和vip角色
+@RequireRole(value = {"admin", "vip"}, requireAll = true)
+```
+
+##### @RequireTool
+工具权限校验注解。
+
+**位置**: `fun.aiboot.annotation.RequireTool`
+
+```java
+// 需要拥有image-generator工具权限
+@RequireTool("image-generator")
+
+// 需要拥有指定的多个工具权限
+@RequireTool(value = {"advanced-search", "data-export"}, requireAll = true)
+```
+
+#### 3.2 权限设计
+
+项目采用RBAC（基于角色的访问控制）+ 工具权限的混合模型：
+
+1. **用户 ← 角色**：一个用户可以拥有多个角色
+2. **角色 ← 工具**：一个角色可以关联多个工具
+3. **用户 ← 工具**：用户也可以直接拥有工具权限
+
+权限继承关系：
+- 用户的最终工具权限 = 用户直接拥有的工具 + 用户所有角色拥有的工具
+
+#### 3.3 密码加密
+
+使用BCrypt算法加密密码，确保密码安全。
+
+**位置**: `fun.aiboot.config.PasswordEncoderConfig`
+
+```java
+@Bean
+public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+}
+```
+
+---
+
+## 4. Business Layer (业务层)
+
+业务层实现具体的业务逻辑，包括用户管理、会话管理、消息处理等核心功能。
+
+### 4.1 核心服务
+
+#### UserService
+用户服务，处理用户注册、登录、密码管理等。
+
+**位置**: `fun.aiboot.service.UserService`
+
+**功能**:
+- 用户注册
+- 用户登录
+- 密码修改
+- 用户信息管理
 
 #### ChatService
 聊天服务，处理聊天消息并调用 AI 模型生成响应。
@@ -451,6 +587,59 @@ public class ChatService implements MessageHandler {
 }
 ```
 
+### 4.2 数据库服务
+
+项目实现了完整的数据库服务层，基于 MyBatis Plus 实现，提供完整的 CRUD 操作：
+
+- `ConversationService` - 会话管理服务
+- `MessageService` - 消息管理服务
+- `ModelService` - 模型管理服务
+- `RoleService` - 角色管理服务
+- `RoleModelService` - 角色模型关联服务
+- `RoleToolService` - 角色工具关联服务
+- `SysPromptService` - 系统提示词服务
+- `ToolService` - 工具管理服务
+- `UserRoleService` - 用户角色关联服务
+- `UserToolService` - 用户工具关联服务
+
+所有服务均遵循 Service/Impl 模式，便于扩展和维护。
+
+### 4.3 数据加密
+
+项目实现了数据加解密功能，保护敏感信息：
+
+#### AesGcmUtil
+AES-GCM 加解密工具类，提供对称加密功能。
+
+**位置**: `fun.aiboot.utils.AesGcmUtil`
+
+**功能**:
+- 数据加密
+- 数据解密
+- 安全的密钥管理
+
+```java
+// 加密
+String encrypted = AesGcmUtil.encrypt("sensitive data");
+
+// 解密
+String decrypted = AesGcmUtil.decrypt(encrypted);
+```
+
+### 4.4 系统提示词管理
+
+系统提示词管理功能允许管理员配置不同的 AI 角色和行为：
+
+#### SysPromptService
+系统提示词服务，管理 AI 的角色设定和行为规范。
+
+**位置**: `fun.aiboot.service.SysPromptService`
+
+**功能**:
+- 提示词管理
+- 角色行为配置
+- 动态提示词更新
+
 ---
 
 ## 快速开始
@@ -459,7 +648,9 @@ public class ChatService implements MessageHandler {
 
 - JDK 21+
 - Maven 3.6+
+- MySQL 8.0+
 - 通义千问 API Key（或其他支持的 AI 服务）
+- OpenAI API Key（可选）
 
 ### 配置步骤
 
@@ -470,26 +661,38 @@ git clone <repository-url>
 cd ai-boot
 ```
 
-#### 2. 配置 API Key
+#### 2. 配置环境变量
 
-设置环境变量：
+设置必要的环境变量：
 ```bash
-export DASHSCOPE_API_KEY=your-api-key-here
+export DASHSCOPE_API_KEY=your-dashscope-api-key-here
+export OPENAI_API_KEY=your-openai-api-key-here
+export mysql_pwd=your-mysql-password
 ```
 
-或在 `application.properties` 中配置：
-```properties
-spring.ai.dashscope.api-key=your-api-key-here
-socket.path=/ws
+#### 3. 配置数据库
+
+在 `src/main/resources/application.yaml` 中配置数据库密码：
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/ai_boot?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: root
+    password: your-mysql-password
+    driver-class-name: com.mysql.cj.jdbc.Driver
 ```
 
-#### 3. 构建项目
+#### 4. 创建数据库表
+
+执行 `db/table.SQL` 中的 SQL 语句创建数据库表。
+
+#### 5. 构建项目
 
 ```bash
 mvn clean install
 ```
 
-#### 4. 运行项目
+#### 6. 运行项目
 
 ```bash
 mvn spring-boot:run
@@ -499,8 +702,32 @@ mvn spring-boot:run
 
 ### 测试 WebSocket 连接
 
-使用 WebSocket 客户端连接到 `ws://localhost:8080/ws`，发送消息：
+1. **用户注册**
+```bash
+curl -X POST http://localhost:8080/user/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "password123",
+    "email": "test@example.com"
+  }'
+```
 
+2. **用户登录**
+```bash
+curl -X POST http://localhost:8080/user/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "testuser",
+    "password": "password123"
+  }'
+```
+
+3. **使用 WebSocket 客户端连接并发送消息**
+
+连接地址：`ws://localhost:8080/ws?token={JWT_TOKEN}`
+
+发送消息：
 ```json
 {
   "type": "chat",
@@ -639,40 +866,41 @@ public class ImageService implements MessageHandler {
 
 ### 添加新的 AI 模型
 
-#### 1. 定义模型类型
+#### 1. 实现模型提供者
 
-在 `ModelFrameworkType` 枚举中添加新类型：
-
-```java
-public enum ModelFrameworkType {
-    dashscope,
-    openai,
-    gemini  // 新增
-}
-```
-
-#### 2. 实现模型提供者
-
-创建新的模型实现类：
+创建新的模型实现类，继承相应的基类：
 
 ```java
 @Component
-public class GeminiModel implements ChatModel {
-    // 实现 Spring AI 的 ChatModel 接口
+public class GeminiModel extends DashscopeModel {
+    // 实现特定于 Gemini 的功能
 }
 ```
 
-#### 3. 在工厂中注册
+#### 2. 在工厂中注册
 
 更新 `ChatModelFactory`:
 
 ```java
 public ChatModel takeChatModel(ModelFrameworkType modelFrameworkType) {
     return switch (modelFrameworkType) {
-        case dashscope -> // ...
-        case openai -> // ...
+        case dashscope -> DashscopeModel.builder()
+                .apiKey(System.getenv("DASHSCOPE_API_KEY"))
+                .modelName("qwen3-max")
+                .toolCallingManager(toolCallingManager)
+                .toolsGlobalRegistry(toolsGlobalRegistry)
+                .build();
+        case openai -> OpenAIModel.builder()
+                .apiKey(System.getenv("OPENAI_API_KEY"))
+                .modelName("gpt-4")
+                .toolCallingManager(toolCallingManager)
+                .toolsGlobalRegistry(toolsGlobalRegistry)
+                .build();
         case gemini -> GeminiModel.builder()
                 .apiKey(System.getenv("GEMINI_API_KEY"))
+                .modelName("gemini-pro")
+                .toolCallingManager(toolCallingManager)
+                .toolsGlobalRegistry(toolsGlobalRegistry)
                 .build();
     };
 }
@@ -721,6 +949,43 @@ public class MessageInterceptor implements HandlerInterceptor {
 }
 ```
 
+### 实现自定义工具调用
+
+创建新的工具功能：
+
+```java
+@Component
+public class DatabaseQueryFunction implements GlobalFunction {
+
+    @Override
+    public ToolCallback getFunctionCallTool() {
+        return ToolCallback.from(
+            "database_query",
+            "Query database for information",
+            this::queryDatabase
+        );
+    }
+
+    public String queryDatabase(QueryRequest request) {
+        // 实现数据库查询逻辑
+        return "Query result";
+    }
+
+    record QueryRequest(
+        @JsonProperty(required = true) String query
+    ) {}
+}
+```
+
+### 扩展权限管理系统
+
+可以添加新的权限实体和服务：
+
+1. 创建新的权限实体类
+2. 实现相应的 Mapper 接口
+3. 创建 Service 和 ServiceImpl 类
+4. 在权限校验切面中添加新的校验逻辑
+
 ---
 
 ## 最佳实践
@@ -758,6 +1023,8 @@ log.info("User {} sent message type: {}, content length: {}",
 - 使用流式响应减少用户等待时间
 - 对长时间运行的任务使用异步处理
 - 合理配置 WebSocket 连接池和线程池
+- 使用数据库连接池优化数据库访问
+- 合理使用缓存减少重复计算
 
 ### 4. 安全考虑
 
@@ -765,6 +1032,9 @@ log.info("User {} sent message type: {}, content length: {}",
 - 对消息内容进行校验和过滤
 - 限制消息大小和频率
 - 保护 API Key 等敏感信息
+- 使用 JWT 进行身份验证
+- 实施 RBAC 权限控制
+- 敏感数据加密存储
 
 ```java
 @Component
@@ -793,6 +1063,29 @@ management.endpoint.health.show-details=always
 - `http://localhost:8080/actuator/health`
 - `http://localhost:8080/actuator/metrics`
 
+### 6. 数据库设计最佳实践
+
+- 合理设计表结构和索引
+- 使用事务确保数据一致性
+- 定期备份重要数据
+- 实施数据归档策略
+
+### 7. AI 模型使用最佳实践
+
+- 合理设置模型参数
+- 实施重试机制处理模型调用失败
+- 监控模型调用成本
+- 定期评估模型性能
+
+```properties
+management.endpoints.web.exposure.include=health,info,metrics
+management.endpoint.health.show-details=always
+```
+
+访问监控端点：
+- `http://localhost:8080/actuator/health`
+- `http://localhost:8080/actuator/metrics`
+
 ---
 
 ## 常见问题
@@ -806,7 +1099,7 @@ let ws;
 let heartbeatTimer;
 
 function connect() {
-  ws = new WebSocket('ws://localhost:8080/ws');
+  ws = new WebSocket('ws://localhost:8080/ws?token=YOUR_JWT_TOKEN');
 
   ws.onopen = () => {
     startHeartbeat();
@@ -833,6 +1126,7 @@ function startHeartbeat() {
 - 增加服务器实例
 - 使用消息队列进行削峰
 - 优化数据库查询
+- 合理配置线程池和连接池
 
 ### Q3: AI 响应太慢怎么办？
 
@@ -840,6 +1134,31 @@ function startHeartbeat() {
 - 缓存常见问题答案
 - 优化提示词减少 token 消耗
 - 选择更快的模型
+- 实施模型调用异步处理
+
+### Q4: 如何管理不同用户的权限？
+
+项目提供了完整的 RBAC 权限管理系统：
+
+- 通过 `@RequireRole` 注解控制角色访问权限
+- 通过 `@RequireTool` 注解控制工具访问权限
+- 使用 `PermissionService` 进行编程式权限检查
+- 通过数据库管理用户、角色和工具的关联关系
+
+### Q5: 如何添加新的 AI 模型支持？
+
+- 实现 `ChatModel` 接口创建新的模型提供者
+- 在 `ChatModelFactory` 中注册新的模型
+- 配置相应的 API Key 环境变量
+- 更新数据库中的模型配置
+
+### Q6: 如何保证数据安全？
+
+- 使用 JWT 进行身份验证
+- 敏感数据使用 AES-GCM 加密存储
+- 密码使用 BCrypt 加密存储
+- 实施完整的 RBAC 权限控制
+- 定期更新安全依赖包
 
 ---
 
@@ -847,52 +1166,54 @@ function startHeartbeat() {
 
 ```
 ai-boot/
+├── db/                                     # 数据库脚本
+│   └── table.SQL                          # 数据库表结构
 ├── src/
 │   ├── main/
 │   │   ├── java/
 │   │   │   └── fun/
 │   │   │       └── aiboot/
-│   │   │           ├── AiBootApplication.java          # 应用入口
-│   │   │           ├── communication/                   # 通信模块
-│   │   │           │   ├── config/
-│   │   │           │   │   └── WebSocketConfig.java    # WebSocket配置
-│   │   │           │   ├── domain/
-│   │   │           │   │   ├── BaseMessage.java        # 消息基类
-│   │   │           │   │   └── ChatMessage.java        # 聊天消息
-│   │   │           │   └── server/
-│   │   │           │       ├── MessageHandler.java     # 消息处理器接口
-│   │   │           │       ├── MessageRouter.java      # 消息路由器接口
-│   │   │           │       ├── DefaultMessageRouter.java # 默认路由实现
-│   │   │           │       ├── WebSocketHandler.java   # WebSocket处理器
-│   │   │           │       ├── SessionManager.java     # 会话管理器接口
-│   │   │           │       ├── WebSocketSessionManagerImpl.java
-│   │   │           │       ├── MessagePublisher.java   # 消息发布器接口
-│   │   │           │       └── WebSocketPublisherImpl.java
-│   │   │           ├── dialogue/                        # 对话模块
-│   │   │           │   └── llm/
-│   │   │           │       ├── factory/
-│   │   │           │       │   ├── ChatModelFactory.java # 模型工厂
-│   │   │           │       │   └── ModelFrameworkType.java # 模型类型枚举
-│   │   │           │       ├── providers/
-│   │   │           │       │   └── DashscopeModel.java  # 通义千问实现
-│   │   │           │       └── tool/
-│   │   │           │           ├── GlobalFunction.java  # 工具接口
-│   │   │           │           ├── ToolsGlobalRegistry.java # 工具注册表
-│   │   │           │           └── function/
-│   │   │           │               ├── TestFunction.java
-│   │   │           │               └── Test1Function.java
-│   │   │           └── service/
-│   │   │               └── ChatService.java             # 聊天服务
+│   │   │           ├── AiBootApplication.java             # 应用入口
+│   │   │           ├── annotation/                        # 权限注解
+│   │   │           ├── aspect/                            # 权限校验切面
+│   │   │           ├── common/                            # 通用类
+│   │   │           ├── config/                            # 配置类
+│   │   │           ├── context/                           # 用户上下文
+│   │   │           ├── controller/                        # 控制器
+│   │   │           ├── entity/                            # 实体类
+│   │   │           ├── exception/                         # 异常处理
+│   │   │           ├── interceptor/                       # 拦截器
+│   │   │           ├── mapper/                            # Mapper接口
+│   │   │           ├── service/                           # 业务服务接口
+│   │   │           │   └── impl/                          # 业务服务实现
+│   │   │           ├── communication/                     # 通信模块
+│   │   │           │   ├── config/                        # WebSocket配置
+│   │   │           │   ├── domain/                        # 消息实体
+│   │   │           │   ├── interceptor/                   # WebSocket拦截器
+│   │   │           │   └── server/                        # WebSocket服务端实现
+│   │   │           ├── dialogue/                          # AI对话模块
+│   │   │           │   └── llm/                           # LLM相关实现
+│   │   │           │       ├── config/                    # 对话配置
+│   │   │           │       ├── factory/                   # 模型工厂
+│   │   │           │       ├── impl/                      # LLM服务实现
+│   │   │           │       ├── memory/                    # 对话记忆
+│   │   │           │       ├── providers/                 # 模型提供者
+│   │   │           │       └── tool/                      # 工具调用
+│   │   │           ├── services/                          # 业务服务
+│   │   │           ├── utils/                             # 工具类
+│   │   │           └── wsservice/                         # WebSocket服务
 │   │   └── resources/
-│   │       └── application.properties                   # 应用配置
+│   │       ├── application.yaml                           # 应用配置
+│   │       └── application.properties                     # 应用配置（备用）
 │   └── test/
 │       └── java/
 │           └── fun/
-│               └── aiboot/
-│                   └── XiaoAiEsp32ApplicationTests.java
-├── pom.xml                                              # Maven配置
-├── README.md                                            # 项目说明
-└── TECHNICAL_DOCUMENTATION.md                           # 技术文档
+│               └── aiboot/                                # 测试代码
+├── pom.xml                                                # Maven配置
+├── README.md                                              # 项目说明
+├── plan.md                                                # 开发计划
+├── TECHNICAL_DOCUMENTATION.md                             # 技术文档
+└── SECURITY_IMPLEMENTATION.md                             # 安全实现说明
 ```
 
 ---
@@ -915,6 +1236,14 @@ ai-boot/
 - 支持流式响应
 - 实现 Function Calling 工具调用
 - 完成基础架构设计
+
+### v0.0.2-SNAPSHOT (2025-11-05)
+- 集成 OpenAI 模型支持
+- 实现完整的 RBAC 权限管理系统
+- 添加会话和消息持久化功能
+- 实现数据加解密功能
+- 完善用户认证和授权机制
+- 添加系统提示词管理功能
 
 ---
 
