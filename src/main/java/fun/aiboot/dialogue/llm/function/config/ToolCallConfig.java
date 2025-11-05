@@ -1,7 +1,7 @@
-package fun.aiboot.dialogue.llm.tool.config;
+package fun.aiboot.dialogue.llm.function.config;
 
 import io.micrometer.observation.ObservationRegistry;
-import fun.aiboot.dialogue.llm.tool.SysToolCallingManager;
+import fun.aiboot.dialogue.llm.function.SysToolCallingManager;
 import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.tool.execution.DefaultToolExecutionExceptionProcessor;
 import org.springframework.ai.tool.execution.ToolExecutionExceptionProcessor;

@@ -268,7 +268,7 @@ public class UserController {
     }
     
     // 需要特定工具权限才能访问
-    @GetMapping("/tool-test")
+    @GetMapping("/function-test")
     @RequireTool("image-generator")
     public Result<String> toolTest() {
         return Result.success("您拥有图片生成工具权限");

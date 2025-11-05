@@ -1,4 +1,4 @@
-package fun.aiboot.dialogue.llm.memory;
+package fun.aiboot.dialogue.llm.context;
 
 import org.springframework.ai.chat.messages.Message;
 
@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * 暂时放弃spring ai 的ChatMemory。
  */
-public interface ChatMemory {
+public interface DialogueContext {
 
     /**
      * 添加消息

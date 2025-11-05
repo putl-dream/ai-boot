@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class ModelConfig {
+public class LlmModelConfiguration {
     private String id;
     private String modelName;
     private String roleName;

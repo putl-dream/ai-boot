@@ -2,7 +2,7 @@ package fun.aiboot.services.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import fun.aiboot.dialogue.llm.config.ModelConfig;
+import fun.aiboot.dialogue.llm.config.LlmModelConfiguration;
 import fun.aiboot.entity.*;
 import fun.aiboot.mapper.*;
 import fun.aiboot.service.ModelService;
@@ -14,7 +14,6 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -243,7 +242,7 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public boolean canAccessModel(String userId, ModelConfig config) {
+    public boolean canAccessModel(String userId, LlmModelConfiguration config) {
         return true;
     }
 }

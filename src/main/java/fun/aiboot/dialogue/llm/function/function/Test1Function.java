@@ -1,7 +1,7 @@
-package fun.aiboot.dialogue.llm.tool.function;
+package fun.aiboot.dialogue.llm.function.function;
 
-import fun.aiboot.dialogue.llm.tool.GlobalFunction;
-import fun.aiboot.dialogue.llm.tool.ToolCallStringResultConverter;
+import fun.aiboot.dialogue.llm.function.GlobalFunction;
+import fun.aiboot.dialogue.llm.function.ToolCallStringResultConverter;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.function.FunctionToolCallback;

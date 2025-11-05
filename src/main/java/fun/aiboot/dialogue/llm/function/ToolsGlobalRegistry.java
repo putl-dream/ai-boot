@@ -1,4 +1,4 @@
-package fun.aiboot.dialogue.llm.tool;
+package fun.aiboot.dialogue.llm.function;
 
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

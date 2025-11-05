@@ -1,4 +1,4 @@
-package fun.aiboot.dialogue.llm.tool;
+package fun.aiboot.dialogue.llm.function;
 
 import com.alibaba.fastjson2.JSON;
 import org.springframework.ai.tool.execution.ToolCallResultConverter;

@@ -1,4 +1,4 @@
-package fun.aiboot.dialogue.llm.tool;
+package fun.aiboot.dialogue.llm.function;
 
 import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -59,9 +59,9 @@ public class SysToolCallingManager implements ToolCallingManager {
 
         List<ToolCallback> toolCallbacks = new ArrayList<>(chatOptions.getToolCallbacks());
         for (String toolName : chatOptions.getToolNames()) {
-            // Skip the tool if it is already present in the request toolCallbacks.
-            // That might happen if a tool is defined in the options
-            // both as a ToolCallback and as a tool name.
+            // Skip the function if it is already present in the request toolCallbacks.
+            // That might happen if a function is defined in the options
+            // both as a ToolCallback and as a function name.
             if (chatOptions.getToolCallbacks()
                     .stream()
                     .anyMatch(tool -> tool.getToolDefinition().name().equals(toolName))) {
@@ -69,7 +69,7 @@ public class SysToolCallingManager implements ToolCallingManager {
             }
             ToolCallback toolCallback = this.toolCallbackResolver.resolve(toolName);
             if (toolCallback == null) {
-                throw new IllegalStateException("No ToolCallback found for tool name: " + toolName);
+                throw new IllegalStateException("No ToolCallback found for function name: " + toolName);
             }
             toolCallbacks.add(toolCallback);
         }
@@ -88,7 +88,7 @@ public class SysToolCallingManager implements ToolCallingManager {
                 .findFirst();
 
         if (toolCallGeneration.isEmpty()) {
-            throw new IllegalStateException("No tool call requested by the chat model");
+            throw new IllegalStateException("No function call requested by the chat model");
         }
 
         // 构建工具上下文

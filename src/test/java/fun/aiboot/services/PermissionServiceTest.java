@@ -224,7 +224,7 @@ class PermissionServiceTest {
         List<String> toolNames = List.of("tool1", "tool2");
         boolean requireAll = true;
 
-        // Mock user tools (direct and through roles)
+        // Mock user function (direct and through roles)
         UserTool userTool = new UserTool();
         userTool.setUserId(userId);
         userTool.setToolId("tool1");
@@ -268,7 +268,7 @@ class PermissionServiceTest {
         List<String> toolNames = List.of("tool1", "tool2", "tool3");
         boolean requireAll = true;
 
-        // Mock user tools (direct and through roles)
+        // Mock user function (direct and through roles)
         UserTool userTool = new UserTool();
         userTool.setUserId(userId);
         userTool.setToolId("tool1");
@@ -308,7 +308,7 @@ class PermissionServiceTest {
         List<String> toolNames = List.of("tool2", "tool3");
         boolean requireAll = false;
 
-        // Mock user tools (direct and through roles)
+        // Mock user function (direct and through roles)
         UserTool userTool = new UserTool();
         userTool.setUserId(userId);
         userTool.setToolId("tool1");
@@ -348,7 +348,7 @@ class PermissionServiceTest {
         List<String> toolNames = List.of("tool3", "tool4");
         boolean requireAll = false;
 
-        // Mock user tools (direct and through roles)
+        // Mock user function (direct and through roles)
         UserTool userTool = new UserTool();
         userTool.setUserId(userId);
         userTool.setToolId("tool1");
@@ -436,12 +436,12 @@ class PermissionServiceTest {
         // Given
         String userId = "user1";
 
-        // Direct user tools
+        // Direct user function
         UserTool userTool = new UserTool();
         userTool.setUserId(userId);
         userTool.setToolId("tool1");
 
-        // Role-based tools
+        // Role-based function
         UserRole userRole = new UserRole();
         userRole.setUserId(userId);
         userRole.setRoleId("role1");

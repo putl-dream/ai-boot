@@ -1,4 +1,4 @@
-package fun.aiboot.dialogue.llm.memory;
+package fun.aiboot.dialogue.llm.context;
 
 import fun.aiboot.communication.server.SessionManager;
 import fun.aiboot.communication.server.WebSocketConstants;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class MySQLChatMemory implements ChatMemory {
+public class MySQLDialogueContext implements DialogueContext {
 
 
     private final Map<String, Message> memory = new HashMap<>();

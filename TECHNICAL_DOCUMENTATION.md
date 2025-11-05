@@ -286,7 +286,7 @@ public class OrderService implements MessageHandler {
 ##### ChatModelFactory
 AI 模型工厂，使用工厂模式创建不同的 AI 模型实例。
 
-**位置**: `fun.aiboot.dialogue.llm.factory.ChatModelFactory`
+**位置**: `fun.aiboot.dialogue.llm.model.ChatModelFactory`
 
 **支持的模型**:
 - `dashscope`: 阿里云通义千问
@@ -317,7 +317,7 @@ public class ChatModelFactory {
 ##### DashscopeModel
 阿里云通义千问模型的实现。
 
-**位置**: `fun.aiboot.dialogue.llm.providers.DashscopeModel`
+**位置**: `fun.aiboot.dialogue.llm.providers.DashscopeLlmProvider`
 
 **功能**:
 - 同步对话调用
@@ -327,7 +327,7 @@ public class ChatModelFactory {
 ##### OpenAIModel
 OpenAI 模型的实现。
 
-**位置**: `fun.aiboot.dialogue.llm.providers.OpenAIModel`
+**位置**: `fun.aiboot.dialogue.llm.providers.OpenAiLlmProvider`
 
 **功能**:
 - 同步对话调用
@@ -337,7 +337,7 @@ OpenAI 模型的实现。
 ##### ToolsGlobalRegistry
 全局工具注册表，管理所有可用的 Function Calling 工具。
 
-**位置**: `fun.aiboot.dialogue.llm.tool.ToolsGlobalRegistry`
+**位置**: `fun.aiboot.dialogue.llm.function.ToolsGlobalRegistry`
 
 **功能**:
 - 注册/注销工具
@@ -366,7 +366,7 @@ public class ToolsGlobalRegistry implements ToolCallbackResolver {
 ##### GlobalFunction
 全局工具接口，所有工具需实现此接口。
 
-**位置**: `fun.aiboot.dialogue.llm.tool.GlobalFunction`
+**位置**: `fun.aiboot.dialogue.llm.function.GlobalFunction`
 
 ```java
 public interface GlobalFunction {

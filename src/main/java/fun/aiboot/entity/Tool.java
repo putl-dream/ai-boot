@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("tool")
+@TableName("function")
 public class Tool implements Serializable {
 
     /**

@@ -1,4 +1,4 @@
-package fun.aiboot.dialogue.llm.memory;
+package fun.aiboot.dialogue.llm.context;
 
 import org.springframework.ai.chat.messages.Message;
 
@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SimpleChatMemory implements ChatMemory {
+public class SimpleDialogueContext implements DialogueContext {
 
     private final Map<String, List<Message>> memory = new HashMap<>();
 

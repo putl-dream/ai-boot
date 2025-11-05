@@ -1,10 +1,7 @@
 package fun.aiboot.communication.server;
 
-import fun.aiboot.dialogue.llm.tool.ToolsGlobalRegistry;
 import fun.aiboot.exception.AuthorizationException;
-import fun.aiboot.service.ConversationService;
 import io.micrometer.common.util.StringUtils;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;

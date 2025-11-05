@@ -1,42 +1,44 @@
 package fun.aiboot.dialogue.llm.providers;
 
-import com.alibaba.cloud.ai.dashscope.api.DashScopeApi;
-import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatModel;
-import com.alibaba.cloud.ai.dashscope.chat.DashScopeChatOptions;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingManager;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.util.Assert;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
 
-public class DashscopeModel implements ChatModel {
+public class OpenAiLlmProvider implements ChatModel {
 
-    private final DashScopeChatModel dashScopeChatModel;
+    private final OpenAiChatModel openAiChatModel;
 
-    public DashscopeModel(String modelName, String apiKey, ToolCallingManager toolCallingManager, List<ToolCallback> toolCallbacks) {
+    public OpenAiLlmProvider(String modelName, String apiKey, ToolCallingManager toolCallingManager, List<ToolCallback> toolCallbacks) {
         Assert.notNull(apiKey, "apiKey must not be null");
         Assert.notNull(modelName, "modelName must not be null");
 
         if (toolCallingManager == null || toolCallbacks == null || toolCallbacks.isEmpty()) {
-            dashScopeChatModel = DashScopeChatModel.builder()
-                    .defaultOptions(DashScopeChatOptions.builder()
-                            .withModel(modelName)
+            openAiChatModel = OpenAiChatModel.builder()
+                    .defaultOptions(OpenAiChatOptions
+                            .builder()
+                            .model(modelName)
+                            .toolCallbacks(toolCallbacks)
                             .build())
-                    .dashScopeApi(DashScopeApi.builder()
-                            .apiKey(apiKey)  // 设置有效的 API 密钥
+                    .openAiApi(OpenAiApi.builder()
+                            .apiKey(apiKey)
                             .build())
                     .build();
         } else {
-            dashScopeChatModel = DashScopeChatModel.builder()
-                    .defaultOptions(DashScopeChatOptions.builder()
-                            .withModel(modelName)
-                            .withToolCallbacks(toolCallbacks)
+            openAiChatModel = OpenAiChatModel.builder()
+                    .defaultOptions(OpenAiChatOptions.builder()
+                            .model(modelName)
+                            .toolCallbacks(toolCallbacks)
                             .build())
-                    .dashScopeApi(DashScopeApi.builder()
+                    .openAiApi(OpenAiApi.builder()
                             .apiKey(apiKey)  // 设置有效的 API 密钥
                             .build())
                     .toolCallingManager(toolCallingManager)
@@ -46,14 +48,13 @@ public class DashscopeModel implements ChatModel {
 
     @Override
     public ChatResponse call(Prompt prompt) {
-        return dashScopeChatModel.call(prompt);
+        return openAiChatModel.call(prompt);
     }
 
     @Override
     public Flux<ChatResponse> stream(Prompt prompt) {
-        return dashScopeChatModel.stream(prompt);
+        return openAiChatModel.stream(prompt);
     }
-
 
     public static class Builder {
         private String modelName = "qwen-plus";
@@ -81,13 +82,12 @@ public class DashscopeModel implements ChatModel {
             return this;
         }
 
-        public DashscopeModel build() {
-            return new DashscopeModel(modelName, apiKey, toolCallingManager, tools);
+        public DashscopeLlmProvider build() {
+            return new DashscopeLlmProvider(modelName, apiKey, toolCallingManager, tools);
         }
     }
 
     public static Builder builder() {
         return new Builder();
     }
-
 }

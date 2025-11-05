@@ -2,8 +2,8 @@ package fun.aiboot.communication.interceptor;
 
 import fun.aiboot.communication.server.WebSocketConstants;
 import fun.aiboot.context.UserContext;
-import fun.aiboot.dialogue.llm.ModelConfigManager;
-import fun.aiboot.dialogue.llm.config.ModelConfig;
+import fun.aiboot.dialogue.llm.context.ModelConfigContext;
+import fun.aiboot.dialogue.llm.config.LlmModelConfiguration;
 import fun.aiboot.entity.Model;
 import fun.aiboot.entity.SysPrompt;
 import fun.aiboot.service.SysPromptService;
@@ -28,7 +28,7 @@ import java.util.Map;
 @Component
 public class WebSocketAuthInterceptor implements HandshakeInterceptor {
     @Resource
-    private ModelConfigManager modelConfigManager;
+    private ModelConfigContext modelConfigContext;
     @Resource
     private PermissionService permissionService;
     @Resource
@@ -69,7 +69,7 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
             // 获取模型配置（modelname、key）,随机获取一个
             Model randomModel = permissionService.getRandomModel(context.getUserId());
 
-            modelConfigManager.save(ModelConfig.builder()
+            modelConfigContext.save(LlmModelConfiguration.builder()
                     .id(sysPrompt.getId())
                     .modelName(randomModel.getName())
                     .apiKey(randomModel.getModelKey())

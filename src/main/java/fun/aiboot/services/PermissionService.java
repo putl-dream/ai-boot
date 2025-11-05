@@ -1,6 +1,6 @@
 package fun.aiboot.services;
 
-import fun.aiboot.dialogue.llm.config.ModelConfig;
+import fun.aiboot.dialogue.llm.config.LlmModelConfiguration;
 import fun.aiboot.entity.Model;
 
 import java.util.List;
@@ -66,5 +66,5 @@ public interface PermissionService {
      */
     Model getRandomModel(String userId);
 
-    boolean canAccessModel(String userId, ModelConfig config);
+    boolean canAccessModel(String userId, LlmModelConfiguration config);
 }

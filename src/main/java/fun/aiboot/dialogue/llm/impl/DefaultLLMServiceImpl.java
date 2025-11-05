@@ -1,8 +1,12 @@
 package fun.aiboot.dialogue.llm.impl;
 
 
-import fun.aiboot.dialogue.llm.*;
-import fun.aiboot.dialogue.llm.factory.ChatModelFactory;
+import fun.aiboot.dialogue.llm.LLMService;
+import fun.aiboot.dialogue.llm.context.LlmPromptContext;
+import fun.aiboot.dialogue.llm.context.LlmPromptContextProvider;
+import fun.aiboot.dialogue.llm.function.ToolsGlobalRegistry;
+import fun.aiboot.dialogue.llm.model.ChatModelFactory;
+import fun.aiboot.dialogue.llm.persona.PersonaProvider;
 import fun.aiboot.services.PermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +24,13 @@ import reactor.core.publisher.Flux;
 @RequiredArgsConstructor
 public class DefaultLLMServiceImpl implements LLMService {
 
-    private final ModelContextBinder modelContextBinder;
+    private final LlmPromptContextProvider llmPromptContextProvider;
     private final PermissionService permissionService;
-    private final ModelPersonaProvider modelPersonaProvider;
+    private final PersonaProvider personaProvider;
     private final ToolCallingManager toolCallingManager;
+    private final ToolsGlobalRegistry toolsGlobalRegistry;
 
-    private BoundModelContext bound;
+    private LlmPromptContext bound;
 
 
     @Override
@@ -69,7 +74,7 @@ public class DefaultLLMServiceImpl implements LLMService {
         /*
          * 通过模型上下文绑定器得到  绑定上下文
          */
-        bound = modelContextBinder.bind(userId, modelId);
+        bound = llmPromptContextProvider.bind(userId, modelId);
 
         /*
          * 根据上下文校验模型权限
@@ -82,7 +87,7 @@ public class DefaultLLMServiceImpl implements LLMService {
         /*
          * 添加角色上下文，构建系统提示词
          */
-        SystemMessage systemPrompt = modelPersonaProvider.getSystemPrompt(bound.config());
+        SystemMessage systemPrompt = personaProvider.getSystemPrompt(bound.config());
         bound.context().addFirst(systemPrompt);
 
         /*
@@ -96,7 +101,8 @@ public class DefaultLLMServiceImpl implements LLMService {
 
     private ChatModel buildModel() {
         return ChatModelFactory.builder()
-                .modelConfig(bound.config())
+                .llmModelConfiguration(bound.config())
+                .toolsGlobalRegistry(toolsGlobalRegistry)
                 .toolCallingManager(toolCallingManager)
                 .build()
                 .takeChatModel();

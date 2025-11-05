@@ -1,4 +1,4 @@
-package fun.aiboot.dialogue.llm.tool;
+package fun.aiboot.dialogue.llm.function;
 
 import org.springframework.ai.tool.ToolCallback;
 
