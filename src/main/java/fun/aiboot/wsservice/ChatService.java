@@ -34,9 +34,6 @@ public class ChatService implements MessageHandler {
         // 生成唯一消息ID
         String messageId = UUID.randomUUID().toString();
 
-        // 日志方便追踪
-        log.info("用户[{}]开始流式请求，消息ID={}，内容={}", userId, messageId, userMsg.getContent());
-
         // 调用大模型服务
         Flux<String> stream = llmService.stream(userId, "default", userMsg.getContent());
 

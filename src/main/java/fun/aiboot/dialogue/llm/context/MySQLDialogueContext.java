@@ -16,16 +16,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
 public class MySQLDialogueContext implements DialogueContext {
 
 
     private final Map<String, Message> memory = new HashMap<>();
 
-    @Resource
-    private MessageMapper messageMapper;
-    @Resource
-    private SessionManager sessionManager;
+    private final MessageMapper messageMapper;
+    private final SessionManager sessionManager;
+
+    public MySQLDialogueContext(MessageMapper messageMapper, SessionManager sessionManager) {
+        this.messageMapper = messageMapper;
+        this.sessionManager = sessionManager;
+    }
 
     @Override
     public void addMessage(String userId, Message content) {
@@ -45,11 +47,11 @@ public class MySQLDialogueContext implements DialogueContext {
             // todo : 大模型输出的内容比较多，后面考虑对上下文进行总结总结内容
             String text = assistantMessage.getText();
             messageMapper.insert(fun.aiboot.entity.Message.builder()
-                            .conversationId(conversationId)
-                            .sender("ai")
-                            .type("text")
-                            .content(text)
-                            .build()
+                    .conversationId(conversationId)
+                    .sender("ai")
+                    .type("text")
+                    .content(text)
+                    .build()
             );
         } else {
             throw new IllegalArgumentException("Unsupported message type: " + content.getClass().getName());

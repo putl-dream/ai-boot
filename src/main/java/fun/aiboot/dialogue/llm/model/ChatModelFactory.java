@@ -40,6 +40,8 @@ public class ChatModelFactory {
 
     // 获取所有工具
     private List<ToolCallback> mapToolCallback(List<String> exposedTools) {
+        if (null == exposedTools || exposedTools.isEmpty()) return null;
+
         Map<String, ToolCallback> allFunctions = toolsGlobalRegistry.getAllFunctions();
         return exposedTools.stream()
                 .map(allFunctions::get)

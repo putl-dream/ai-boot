@@ -1,20 +1,23 @@
 package fun.aiboot.dialogue.llm.config;
 
+import fun.aiboot.communication.server.SessionManager;
 import fun.aiboot.dialogue.llm.context.DialogueContext;
 import fun.aiboot.dialogue.llm.context.MySQLDialogueContext;
-import jakarta.annotation.Resource;
+import fun.aiboot.mapper.MessageMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@RequiredArgsConstructor
 public class ChatMemoryConfig {
 
-    @Resource
-    MySQLDialogueContext mySQLChatMemory;
+    private final MessageMapper messageMapper;
+    private final SessionManager sessionManager;
 
     @Bean
     public DialogueContext chatMemory() {
-        return mySQLChatMemory;
+        return new MySQLDialogueContext(messageMapper, sessionManager);
     }
 
 }

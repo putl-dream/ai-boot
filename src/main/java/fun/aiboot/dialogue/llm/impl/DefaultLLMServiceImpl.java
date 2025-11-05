@@ -63,7 +63,6 @@ public class DefaultLLMServiceImpl implements LLMService {
                 })
                 .doOnNext(token -> log.debug("Streaming token: {}", token))
                 .doOnComplete(() -> {
-                    log.info("Stream completed for user: {}", userId);
                     log.info("Response: {}", responseBuilder);
                 })
                 .doOnError(error -> log.error("Stream error for user {}: {}", userId, error.getMessage(), error));
