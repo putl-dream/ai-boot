@@ -1,4 +1,4 @@
-//package fun.aiboot.wsservice;
+//package fun.aiboot.servicews;
 //
 //import fun.aiboot.communication.domain.ChatMessage;
 //import fun.aiboot.communication.server.MessagePublisher;
