@@ -1,6 +1,6 @@
 package fun.aiboot.dialogue.llm.config;
 
-import fun.aiboot.communication.server.SessionManager;
+import fun.aiboot.websocket.server.SessionManager;
 import fun.aiboot.dialogue.llm.context.DialogueContext;
 import fun.aiboot.dialogue.llm.context.MySQLDialogueContext;
 import fun.aiboot.mapper.MessageMapper;

@@ -1,18 +1,15 @@
 package fun.aiboot.services;
 
 import fun.aiboot.entity.User;
-import fun.aiboot.exception.BusinessException;
+import fun.aiboot.common.exception.BusinessException;
 import fun.aiboot.service.UserService;
 import fun.aiboot.services.impl.AuthServiceImpl;
-import fun.aiboot.utils.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;

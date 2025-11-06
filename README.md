@@ -185,7 +185,7 @@ public class CustomService implements MessageHandler {
 }
 ```
 
-消息实体需继承 [BaseMessage](src/main/java/fun/aiboot/communication/domain/BaseMessage.java)，参考 [ChatMessage](src/main/java/fun/aiboot/communication/domain/ChatMessage.java)。
+消息实体需继承 [BaseMessage](src/main/java/fun/aiboot/websocket/domain/BaseMessage.java)，参考 [ChatMessage](src/main/java/fun/aiboot/websocket/domain/ChatMessage.java)。
 
 完整实现参考 [ChatService.java](src/main/java/fun/aiboot/services/ChatService.java)
 

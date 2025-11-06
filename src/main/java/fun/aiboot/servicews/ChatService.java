@@ -1,10 +1,10 @@
 package fun.aiboot.servicews;
 
-import fun.aiboot.communication.domain.BaseMessage;
-import fun.aiboot.communication.domain.ChatMessage;
-import fun.aiboot.communication.domain.FormType;
-import fun.aiboot.communication.server.MessageHandler;
-import fun.aiboot.communication.server.MessagePublisher;
+import fun.aiboot.websocket.domain.BaseMessage;
+import fun.aiboot.websocket.domain.ChatMessage;
+import fun.aiboot.websocket.domain.FormType;
+import fun.aiboot.websocket.server.MessageHandler;
+import fun.aiboot.websocket.server.MessagePublisher;
 import fun.aiboot.dialogue.llm.LLMService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

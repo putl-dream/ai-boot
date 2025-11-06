@@ -1,14 +1,12 @@
 package fun.aiboot.dialogue.llm.context;
 
-import fun.aiboot.communication.domain.FormType;
-import fun.aiboot.communication.server.SessionManager;
-import fun.aiboot.communication.server.WebSocketConstants;
+import fun.aiboot.websocket.domain.FormType;
+import fun.aiboot.websocket.server.SessionManager;
+import fun.aiboot.websocket.server.WebSocketConstants;
 import fun.aiboot.mapper.MessageMapper;
-import jakarta.annotation.Resource;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketSession;
 

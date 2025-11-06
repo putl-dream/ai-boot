@@ -115,7 +115,7 @@ AI-Boot 是一个基于 Spring Boot 和 Spring AI 构建的智能对话系统框
 ##### WebSocketConfig
 配置类，注册 WebSocket 端点。
 
-**位置**: `fun.aiboot.communication.config.WebSocketConfig`
+**位置**: `fun.aiboot.websocket.config.WebSocketConfig`
 
 **配置项**:
 - `socket.path`: WebSocket 端点路径，默认 `/ws`
@@ -138,7 +138,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 ##### WebSocketHandler
 处理 WebSocket 连接的建立、消息接收、连接关闭等事件。
 
-**位置**: `fun.aiboot.communication.server.WebSocketHandler`
+**位置**: `fun.aiboot.websocket.server.WebSocketHandler`
 
 **主要方法**:
 - `afterConnectionEstablished`: 连接建立时触发
@@ -148,7 +148,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 ##### MessageRouter
 消息路由器，根据消息类型自动分发到对应的处理器。
 
-**位置**: `fun.aiboot.communication.server.DefaultMessageRouter`
+**位置**: `fun.aiboot.websocket.server.DefaultMessageRouter`
 
 **工作流程**:
 1. 接收原始 JSON 消息
@@ -180,7 +180,7 @@ public class DefaultMessageRouter implements MessageRouter {
 ##### SessionManager
 会话管理器，维护用户 WebSocket 会话。
 
-**位置**: `fun.aiboot.communication.server.WebSocketSessionManagerImpl`
+**位置**: `fun.aiboot.websocket.server.WebSocketSessionManagerImpl`
 
 **功能**:
 - 添加/移除会话
@@ -190,7 +190,7 @@ public class DefaultMessageRouter implements MessageRouter {
 ##### MessagePublisher
 消息发布器，向客户端发送消息。
 
-**位置**: `fun.aiboot.communication.server.WebSocketPublisherImpl`
+**位置**: `fun.aiboot.websocket.server.WebSocketPublisherImpl`
 
 **功能**:
 - 向指定用户发送消息
@@ -201,7 +201,7 @@ public class DefaultMessageRouter implements MessageRouter {
 ##### BaseMessage
 所有消息的基类，使用 Jackson 多态支持。
 
-**位置**: `fun.aiboot.communication.domain.BaseMessage`
+**位置**: `fun.aiboot.websocket.domain.BaseMessage`
 
 ```java
 @JsonTypeInfo(
@@ -220,7 +220,7 @@ public sealed abstract class BaseMessage permits ChatMessage {
 ##### ChatMessage
 聊天消息实体。
 
-**位置**: `fun.aiboot.communication.domain.ChatMessage`
+**位置**: `fun.aiboot.websocket.domain.ChatMessage`
 
 **字段**:
 - `from`: 发送者ID
@@ -428,7 +428,7 @@ JWT 工具类，负责生成和解析 JWT token。
 ##### JwtAuthenticationInterceptor
 JWT 认证拦截器，拦截所有请求并验证 JWT token。
 
-**位置**: `fun.aiboot.interceptor.JwtAuthenticationInterceptor`
+**位置**: `fun.aiboot.common.interceptor.JwtAuthenticationInterceptor`
 
 **特性**:
 - 从请求头`Authorization`中提取token
@@ -439,7 +439,7 @@ JWT 认证拦截器，拦截所有请求并验证 JWT token。
 ##### UserContext
 用户上下文，使用ThreadLocal存储当前登录用户信息。
 
-**位置**: `fun.aiboot.context.UserContext`
+**位置**: `fun.aiboot.common.context.UserContext`
 
 ```java
 String userId = UserContext.getUserId();
@@ -460,7 +460,7 @@ String username = UserContext.getUsername();
 ##### @RequireRole
 角色权限校验注解。
 
-**位置**: `fun.aiboot.annotation.RequireRole`
+**位置**: `fun.aiboot.common.annotation.RequireRole`
 
 ```java
 // 需要拥有admin角色
@@ -476,7 +476,7 @@ String username = UserContext.getUsername();
 ##### @RequireTool
 工具权限校验注解。
 
-**位置**: `fun.aiboot.annotation.RequireTool`
+**位置**: `fun.aiboot.common.annotation.RequireTool`
 
 ```java
 // 需要拥有image-generator工具权限

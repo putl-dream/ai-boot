@@ -1,10 +1,10 @@
 package fun.aiboot.services.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import fun.aiboot.context.UserContext;
+import fun.aiboot.common.context.UserContext;
 import fun.aiboot.dialogue.llm.context.ModelConfigContext;
 import fun.aiboot.entity.User;
-import fun.aiboot.exception.BusinessException;
+import fun.aiboot.common.exception.BusinessException;
 import fun.aiboot.service.SysPromptService;
 import fun.aiboot.service.UserService;
 import fun.aiboot.services.AuthService;

@@ -1,7 +1,7 @@
 package fun.aiboot.utils;
 
 import com.alibaba.fastjson2.JSON;
-import fun.aiboot.context.UserContext;
+import fun.aiboot.common.context.UserContext;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

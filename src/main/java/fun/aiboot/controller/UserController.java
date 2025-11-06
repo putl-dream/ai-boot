@@ -1,9 +1,9 @@
 package fun.aiboot.controller;
 
-import fun.aiboot.annotation.RequireRole;
-import fun.aiboot.annotation.RequireTool;
+import fun.aiboot.common.annotation.RequireRole;
+import fun.aiboot.common.annotation.RequireTool;
 import fun.aiboot.common.Result;
-import fun.aiboot.context.UserContextHolder;
+import fun.aiboot.common.context.UserContextHolder;
 import fun.aiboot.entity.User;
 
 import fun.aiboot.service.UserService;

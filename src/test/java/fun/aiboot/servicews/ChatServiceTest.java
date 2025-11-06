@@ -1,7 +1,7 @@
 //package fun.aiboot.servicews;
 //
-//import fun.aiboot.communication.domain.ChatMessage;
-//import fun.aiboot.communication.server.MessagePublisher;
+//import fun.aiboot.websocket.domain.ChatMessage;
+//import fun.aiboot.websocket.server.MessagePublisher;
 //import fun.aiboot.dialogue.llm.LLMService;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Test;
