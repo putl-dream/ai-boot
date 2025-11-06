@@ -4,6 +4,7 @@ package fun.aiboot.dialogue.llm.impl;
 import fun.aiboot.dialogue.llm.LLMService;
 import fun.aiboot.dialogue.llm.context.LlmPromptContext;
 import fun.aiboot.dialogue.llm.context.LlmPromptContextProvider;
+import fun.aiboot.dialogue.llm.context.MySQLDialogueContext;
 import fun.aiboot.dialogue.llm.function.ToolsGlobalRegistry;
 import fun.aiboot.dialogue.llm.model.ChatModelFactory;
 import fun.aiboot.dialogue.llm.persona.PersonaProvider;
@@ -29,6 +30,7 @@ public class DefaultLLMServiceImpl implements LLMService {
     private final PersonaProvider personaProvider;
     private final ToolCallingManager toolCallingManager;
     private final ToolsGlobalRegistry toolsGlobalRegistry;
+    private final MySQLDialogueContext mySQLDialogueContext;
 
     private LlmPromptContext bound;
 
@@ -45,9 +47,11 @@ public class DefaultLLMServiceImpl implements LLMService {
 
     @Override
     public Flux<String> stream(String userId, String modelId, String message) {
+        mySQLDialogueContext.addMessage(userId, new UserMessage(message));
         Prompt prompt = buildPrompt(userId, modelId, message);
         ChatModel chatModel = buildModel();
 
+        // 全量内容
         StringBuilder responseBuilder = new StringBuilder();
 
         return chatModel.stream(prompt)
@@ -64,6 +68,7 @@ public class DefaultLLMServiceImpl implements LLMService {
                 .doOnNext(token -> log.debug("Streaming token: {}", token))
                 .doOnComplete(() -> {
                     log.info("Response: {}", responseBuilder);
+                    mySQLDialogueContext.addMessage(userId, new SystemMessage(responseBuilder.toString()));
                 })
                 .doOnError(error -> log.error("Stream error for user {}: {}", userId, error.getMessage(), error));
     }
