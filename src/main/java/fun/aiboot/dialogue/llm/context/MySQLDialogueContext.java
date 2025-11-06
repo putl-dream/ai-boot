@@ -1,5 +1,6 @@
 package fun.aiboot.dialogue.llm.context;
 
+import fun.aiboot.communication.domain.FormType;
 import fun.aiboot.communication.server.SessionManager;
 import fun.aiboot.communication.server.WebSocketConstants;
 import fun.aiboot.mapper.MessageMapper;
@@ -39,7 +40,7 @@ public class MySQLDialogueContext implements DialogueContext {
         if (content instanceof UserMessage userMessage) {
             messageMapper.insert(fun.aiboot.entity.Message.builder()
                     .conversationId(conversationId)
-                    .sender("user")
+                    .sender(FormType.USER.toString())
                     .type("text")
                     .content(userMessage.getText())
                     .build());
@@ -48,7 +49,7 @@ public class MySQLDialogueContext implements DialogueContext {
             String text = assistantMessage.getText();
             messageMapper.insert(fun.aiboot.entity.Message.builder()
                     .conversationId(conversationId)
-                    .sender("ai")
+                    .sender(FormType.ASSISTANT.toString())
                     .type("text")
                     .content(text)
                     .build()

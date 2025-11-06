@@ -2,6 +2,7 @@ package fun.aiboot.dialogue.llm.impl;
 
 
 import fun.aiboot.dialogue.llm.LLMService;
+import fun.aiboot.dialogue.llm.context.DialogueContext;
 import fun.aiboot.dialogue.llm.context.LlmPromptContext;
 import fun.aiboot.dialogue.llm.context.LlmPromptContextProvider;
 import fun.aiboot.dialogue.llm.context.MySQLDialogueContext;
@@ -11,6 +12,7 @@ import fun.aiboot.dialogue.llm.persona.PersonaProvider;
 import fun.aiboot.services.PermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
@@ -30,7 +32,7 @@ public class DefaultLLMServiceImpl implements LLMService {
     private final PersonaProvider personaProvider;
     private final ToolCallingManager toolCallingManager;
     private final ToolsGlobalRegistry toolsGlobalRegistry;
-    private final MySQLDialogueContext mySQLDialogueContext;
+    private final DialogueContext dialogueContext;
 
     private LlmPromptContext bound;
 
@@ -47,7 +49,7 @@ public class DefaultLLMServiceImpl implements LLMService {
 
     @Override
     public Flux<String> stream(String userId, String modelId, String message) {
-        mySQLDialogueContext.addMessage(userId, new UserMessage(message));
+        dialogueContext.addMessage(userId, new UserMessage(message));
         Prompt prompt = buildPrompt(userId, modelId, message);
         ChatModel chatModel = buildModel();
 
@@ -68,7 +70,7 @@ public class DefaultLLMServiceImpl implements LLMService {
                 .doOnNext(token -> log.debug("Streaming token: {}", token))
                 .doOnComplete(() -> {
                     log.info("Response: {}", responseBuilder);
-                    mySQLDialogueContext.addMessage(userId, new SystemMessage(responseBuilder.toString()));
+                    dialogueContext.addMessage(userId, new AssistantMessage(responseBuilder.toString()));
                 })
                 .doOnError(error -> log.error("Stream error for user {}: {}", userId, error.getMessage(), error));
     }
