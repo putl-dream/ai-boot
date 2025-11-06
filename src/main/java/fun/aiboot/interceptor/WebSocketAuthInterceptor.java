@@ -1,4 +1,4 @@
-package fun.aiboot.communication.interceptor;
+package fun.aiboot.interceptor;
 
 import fun.aiboot.communication.server.WebSocketConstants;
 import fun.aiboot.context.UserContext;
@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -68,6 +69,7 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
 
             // 获取模型配置（modelname、key）,随机获取一个
             Model randomModel = permissionService.getRandomModel(context.getUserId());
+            List<String> userTools = permissionService.getUserTools(context.getUserId());
 
             modelConfigContext.save(LlmModelConfiguration.builder()
                     .id(sysPrompt.getId())
@@ -75,9 +77,8 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
                     .apiKey(randomModel.getModelKey())
                     .provider(randomModel.getProvider())
                     .roleName(sysPrompt.getName())
-                    .exposedTools(null)
+                    .exposedTools(userTools)
                     .build());
-
 
             // 将用户信息存储到attributes中,可以跨线程使用
             attributes.put(WebSocketConstants.User_Context, context);

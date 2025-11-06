@@ -1,7 +1,7 @@
 package fun.aiboot.communication.config;
 
 
-import fun.aiboot.communication.interceptor.WebSocketAuthInterceptor;
+import fun.aiboot.interceptor.WebSocketAuthInterceptor;
 import fun.aiboot.communication.server.WebSocketHandler;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
