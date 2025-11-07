@@ -633,7 +633,7 @@ String decrypted = AesGcmUtil.decrypt(encrypted);
 #### SysPromptService
 系统提示词服务，管理 AI 的角色设定和行为规范。
 
-**位置**: `fun.aiboot.service.SysPromptService`
+**位置**: `fun.aiboot.service.ModelRoleService`
 
 **功能**:
 - 提示词管理

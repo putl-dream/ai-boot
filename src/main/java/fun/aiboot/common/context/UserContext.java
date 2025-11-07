@@ -26,7 +26,8 @@ public class UserContext {
     private List<String> roleToolIds;
 
     // 用户动态上下文（运行态部分）
-    private String currentModelId;
+    private String currentModel;
+    private String currentModelRole;
 
     // 缓存时间戳（用于刷新）
     private LocalDateTime lastUpdated;

@@ -1,5 +1,6 @@
 package fun.aiboot.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.aiboot.entity.User;
 import fun.aiboot.mapper.UserMapper;
@@ -21,4 +22,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
+    @Override
+    public User getByUserName(String username) {
+        return getOne(Wrappers.lambdaQuery(User.class)
+                .eq(User::getUsername, username)
+        );
+    }
 }

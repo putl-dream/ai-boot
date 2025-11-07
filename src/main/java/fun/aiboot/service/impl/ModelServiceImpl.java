@@ -1,5 +1,6 @@
 package fun.aiboot.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.aiboot.entity.Model;
 import fun.aiboot.mapper.ModelMapper;
@@ -17,4 +18,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ModelServiceImpl extends ServiceImpl<ModelMapper, Model> implements ModelService {
 
+    @Override
+    public Model getByName(String name) {
+        return this.getOne(Wrappers.lambdaQuery(Model.class).eq(Model::getName, name));
+    }
 }

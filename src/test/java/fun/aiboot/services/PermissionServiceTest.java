@@ -406,7 +406,7 @@ class PermissionServiceTest {
         when(roleMapper.selectBatchIds(anyList())).thenReturn(List.of(role1, role2));
 
         // When
-        List<String> result = permissionService.getUserRoles(userId);
+        List<String> result = permissionService.getRoleNames(userId);
 
         // Then
         assertEquals(2, result.size());
@@ -424,7 +424,7 @@ class PermissionServiceTest {
         when(userRoleMapper.selectList(any())).thenReturn(List.of());
 
         // When
-        List<String> result = permissionService.getUserRoles(userId);
+        List<String> result = permissionService.getRoleNames(userId);
 
         // Then
         assertTrue(result.isEmpty());

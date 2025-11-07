@@ -44,9 +44,14 @@ public class UserContextHolder {
         return context == null ? null : context.getRoleToolIds();
     }
 
-    public static String getCurrentModelId() {
+    public static String getCurrentModel() {
         UserContext context = get();
-        return context == null ? null : context.getCurrentModelId();
+        return context == null ? null : context.getCurrentModel();
+    }
+
+    public static String getCurrentModelRole() {
+        UserContext context = get();
+        return context == null ? null : context.getCurrentModelRole();
     }
 
     public static LocalDateTime getLastUpdated() {

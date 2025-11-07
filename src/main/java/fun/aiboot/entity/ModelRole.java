@@ -21,8 +21,8 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("sys_prompt")
-public class SysPrompt implements Serializable {
+@TableName("model_role")
+public class ModelRole implements Serializable {
 
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;

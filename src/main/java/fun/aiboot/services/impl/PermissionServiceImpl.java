@@ -1,14 +1,14 @@
 package fun.aiboot.services.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import fun.aiboot.dialogue.llm.config.LlmModelConfiguration;
 import fun.aiboot.entity.*;
-import fun.aiboot.mapper.*;
-import fun.aiboot.service.ModelService;
-import fun.aiboot.service.RoleModelService;
-import fun.aiboot.service.RoleToolService;
-import fun.aiboot.service.UserRoleService;
+import fun.aiboot.mapper.RoleToolMapper;
+import fun.aiboot.mapper.ToolMapper;
+import fun.aiboot.mapper.UserToolMapper;
+import fun.aiboot.service.*;
 import fun.aiboot.services.PermissionService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,27 +31,26 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PermissionServiceImpl implements PermissionService {
 
-    private final UserRoleMapper userRoleMapper;
-    private final RoleMapper roleMapper;
+    private final UserRoleService userRoleService;
+    private final RoleService roleService;
     private final UserToolMapper userToolMapper;
     private final ToolMapper toolMapper;
     private final RoleToolMapper roleToolMapper;
     private final ModelService modelService;
     private final RoleModelService roleModelService;
-    private final UserRoleService userRoleService;
     private final RoleToolService roleToolService;
 
     @PostConstruct
     public void init() {
         // 创建默认角色
-        Role defaultRole = roleMapper.selectOne(Wrappers.lambdaQuery(Role.class).eq(Role::getId, "default").last("LIMIT 1"));
+        Role defaultRole = roleService.getOne(Wrappers.lambdaQuery(Role.class).eq(Role::getId, "default").last("LIMIT 1"));
         if (defaultRole == null) {
             defaultRole = Role.builder()
                     .id("default")
                     .name("user")
                     .description("普通用户")
                     .build();
-            roleMapper.insert(defaultRole);
+            roleService.save(defaultRole);
         }
 
         // 创建默认模型
@@ -109,7 +107,7 @@ public class PermissionServiceImpl implements PermissionService {
     @Override
     public void createDefaultRole(String userId) {
         // 为用户创建默认角色和工具权限
-        Role defaultRole = roleMapper.selectOne(Wrappers.lambdaQuery(Role.class).eq(Role::getId, "default").last("LIMIT 1"));
+        Role defaultRole = roleService.getOne(Wrappers.lambdaQuery(Role.class).eq(Role::getId, "default").last("LIMIT 1"));
         userRoleService.save(UserRole.builder()
                 .userId(userId)
                 .roleId(defaultRole.getId())
@@ -122,7 +120,7 @@ public class PermissionServiceImpl implements PermissionService {
             return true;
         }
 
-        List<String> userRoles = getUserRoles(userId);
+        List<String> userRoles = getRoleNames(userId);
         Set<String> userRoleSet = new HashSet<>(userRoles);
 
         if (requireAll) {
@@ -153,11 +151,9 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public List<String> getUserRoles(String userId) {
+    public List<String> getRoleNames(String userId) {
         // 查询用户的角色ID列表
-        List<UserRole> userRoles = userRoleMapper.selectList(
-                new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, userId)
-        );
+        List<UserRole> userRoles = userRoleService.selectByUserId(userId);
 
         if (userRoles.isEmpty()) {
             return List.of();
@@ -168,7 +164,7 @@ public class PermissionServiceImpl implements PermissionService {
                 .map(UserRole::getRoleId)
                 .collect(Collectors.toList());
 
-        List<Role> roles = roleMapper.selectBatchIds(roleIds);
+        List<Role> roles = roleService.listByIds(roleIds);
 
         // 返回角色名称列表
         return roles.stream()
@@ -221,24 +217,28 @@ public class PermissionServiceImpl implements PermissionService {
     }
 
     @Override
-    public List<String> getUserModels(String userId) {
-        List<UserRole> userRoleList = userRoleMapper.selectList(
-                new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, userId)
-        );
+    public List<String> getModelIdsByUserId(String userId) {
+        List<UserRole> userRoleList = userRoleService.selectByUserId(userId);
         List<String> userRoles = userRoleList.stream().map(UserRole::getRoleId).toList();
-        List<RoleModel> roleModels = roleModelService.getBaseMapper().selectList(Wrappers.lambdaQuery(RoleModel.class)
-                .in(RoleModel::getRoleId, userRoles)
-        );
+
+        List<RoleModel> roleModels = roleModelService.selectByRoleIds(userRoles);
         return roleModels.stream()
                 .map(RoleModel::getModelId)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Model getRandomModel(String userId) {
-        List<String> userModels = getUserModels(userId);
-        Random random = new Random();
-        return modelService.getById(userModels.get(random.nextInt(userModels.size())));
+    public Model getModelById(String userId, String modelId) {
+        log.info("[ 用户模型权限校验 ] : 用户{} ，模型 {}", userId, modelId);
+
+        List<String> modelIdsByUserId = getModelIdsByUserId(userId);
+        Assert.notNull(modelIdsByUserId, "用户没有模型权限");
+
+        if (!modelIdsByUserId.contains(modelId)) {
+            throw new RuntimeException("用户没有模型权限");
+        }
+
+        return modelService.getById(modelId);
     }
 
     @Override

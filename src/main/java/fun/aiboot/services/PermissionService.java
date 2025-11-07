@@ -20,8 +20,8 @@ public interface PermissionService {
     /**
      * 检查用户是否拥有指定角色
      *
-     * @param userId 用户ID
-     * @param roleNames 角色名称列表
+     * @param userId     用户ID
+     * @param roleNames  角色名称列表
      * @param requireAll 是否需要拥有所有角色
      * @return 是否有权限
      */
@@ -30,8 +30,8 @@ public interface PermissionService {
     /**
      * 检查用户是否拥有指定工具权限
      *
-     * @param userId 用户ID
-     * @param toolNames 工具名称列表
+     * @param userId     用户ID
+     * @param toolNames  工具名称列表
      * @param requireAll 是否需要拥有所有工具权限
      * @return 是否有权限
      */
@@ -43,7 +43,7 @@ public interface PermissionService {
      * @param userId 用户ID
      * @return 角色名称列表
      */
-    List<String> getUserRoles(String userId);
+    List<String> getRoleNames(String userId);
 
     /**
      * 获取用户的所有工具名称
@@ -59,12 +59,16 @@ public interface PermissionService {
      * @param userId 用户ID
      * @return 模型ID列表
      */
-    List<String> getUserModels(String userId);
+    List<String> getModelIdsByUserId(String userId);
 
     /**
-     * 随机获取一个模型
+     * 获取模型信息
+     *
+     * @param userId  用户ID
+     * @param modelId 模型ID
+     * @return 模型信息
      */
-    Model getRandomModel(String userId);
+    Model getModelById(String userId, String modelId);
 
     boolean canAccessModel(String userId, LlmModelConfiguration config);
 }

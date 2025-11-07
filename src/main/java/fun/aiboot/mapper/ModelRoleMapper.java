@@ -1,6 +1,6 @@
 package fun.aiboot.mapper;
 
-import fun.aiboot.entity.SysPrompt;
+import fun.aiboot.entity.ModelRole;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**
@@ -11,6 +11,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author putl
  * @since 2025-11-05
  */
-public interface SysPromptMapper extends BaseMapper<SysPrompt> {
+public interface ModelRoleMapper extends BaseMapper<ModelRole> {
 
 }

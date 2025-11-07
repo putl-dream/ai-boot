@@ -1,10 +1,13 @@
 package fun.aiboot.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.aiboot.entity.UserRole;
 import fun.aiboot.mapper.UserRoleMapper;
 import fun.aiboot.service.UserRoleService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -17,4 +20,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> implements UserRoleService {
 
+    @Override
+    public List<UserRole> selectByUserId(String userId) {
+        return baseMapper.selectList(Wrappers.lambdaQuery(UserRole.class)
+                .eq(UserRole::getUserId, userId)
+        );
+    }
 }

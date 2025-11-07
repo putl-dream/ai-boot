@@ -2,10 +2,8 @@ package fun.aiboot.services.impl;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import fun.aiboot.common.context.UserContext;
-import fun.aiboot.dialogue.llm.context.ModelConfigContext;
-import fun.aiboot.entity.User;
 import fun.aiboot.common.exception.BusinessException;
-import fun.aiboot.service.SysPromptService;
+import fun.aiboot.entity.User;
 import fun.aiboot.service.UserService;
 import fun.aiboot.services.AuthService;
 import fun.aiboot.services.PermissionService;
@@ -26,8 +24,6 @@ public class AuthServiceImpl implements AuthService {
     private final PermissionService permissionService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
-    private final SysPromptService sysPromptService;
-    private final ModelConfigContext modelConfigContext;
 
     @Override
     public String login(String username, String password) {
@@ -35,9 +31,7 @@ public class AuthServiceImpl implements AuthService {
         Assert.notNull(password, "password cannot be null");
 
         // 根据用户名查询用户
-        User user = userService.getOne(Wrappers.lambdaQuery(User.class)
-                .eq(User::getUsername, username)
-        );
+        User user = userService.getByUserName(username);
 
         if (user == null) {
             log.warn("登录失败：用户不存在 - {}", username);
@@ -50,21 +44,23 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(401, "用户名或密码错误");
         }
 
-        log.info("用户登录成功：{}", username);
-        List<String> userRoles = permissionService.getUserRoles(user.getId());
+        List<String> userRoles = permissionService.getRoleNames(user.getId());
         List<String> userTools = permissionService.getUserTools(user.getId());
-        List<String> userModels = permissionService.getUserModels(user.getId());
+        List<String> userModels = permissionService.getModelIdsByUserId(user.getId());
 
         // 生成token
-        return JwtUtil.generateJwt(UserContext.builder()
+        String token = JwtUtil.generateJwt(UserContext.builder()
                 .userId(user.getId())
                 .username(username)
                 .roles(userRoles)
                 .roleModelIds(userModels)
                 .roleToolIds(userTools)
-                .currentModelId(user.getModelId())
+                .currentModel(user.getModelId())
+                .currentModelRole(user.getModelRoleId())
                 .lastUpdated(LocalDateTime.now())
                 .build());
+        log.info("[ 用户登录成功 ] : username {}，角色：{}", username, userRoles);
+        return token;
     }
 
     @Override

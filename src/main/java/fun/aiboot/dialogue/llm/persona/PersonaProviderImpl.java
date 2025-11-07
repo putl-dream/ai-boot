@@ -1,8 +1,8 @@
 package fun.aiboot.dialogue.llm.persona;
 
 import fun.aiboot.dialogue.llm.config.LlmModelConfiguration;
-import fun.aiboot.entity.SysPrompt;
-import fun.aiboot.service.SysPromptService;
+import fun.aiboot.entity.ModelRole;
+import fun.aiboot.service.ModelRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.stereotype.Component;
@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PersonaProviderImpl implements PersonaProvider {
 
-    private final SysPromptService sysPromptService;
+    private final ModelRoleService modelRoleService;
 
     @Override
     public SystemMessage getSystemPrompt(LlmModelConfiguration model) {
         String id = model.getId();
-        SysPrompt prompt = sysPromptService.getById(id);
+        ModelRole prompt = modelRoleService.getById(id);
         return new SystemMessage(prompt.getSkill());
     }
 }

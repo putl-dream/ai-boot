@@ -12,5 +12,11 @@ import fun.aiboot.entity.Model;
  * @since 2025-10-31
  */
 public interface ModelService extends IService<Model> {
-
+    /**
+     * 根据名称查询模型
+     *
+     * @param name 模型名称
+     * @return 模型
+     */
+    Model getByName(String name);
 }

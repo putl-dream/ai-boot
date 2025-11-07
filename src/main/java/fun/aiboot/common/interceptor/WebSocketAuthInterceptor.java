@@ -1,14 +1,14 @@
 package fun.aiboot.common.interceptor;
 
-import fun.aiboot.websocket.server.WebSocketConstants;
 import fun.aiboot.common.context.UserContext;
-import fun.aiboot.dialogue.llm.context.ModelConfigContext;
 import fun.aiboot.dialogue.llm.config.LlmModelConfiguration;
+import fun.aiboot.dialogue.llm.context.ModelConfigContext;
 import fun.aiboot.entity.Model;
-import fun.aiboot.entity.SysPrompt;
-import fun.aiboot.service.SysPromptService;
+import fun.aiboot.entity.ModelRole;
+import fun.aiboot.service.ModelRoleService;
 import fun.aiboot.services.PermissionService;
 import fun.aiboot.utils.JwtUtil;
+import fun.aiboot.websocket.server.WebSocketConstants;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,7 +33,7 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
     @Resource
     private PermissionService permissionService;
     @Resource
-    private SysPromptService sysPromptService;
+    private ModelRoleService modelRoleService;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
@@ -65,18 +65,18 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
             }
 
             Assert.notNull(context, "User information cannot be empty");
-            SysPrompt sysPrompt = sysPromptService.getById(context.getCurrentModelId());
+            ModelRole modelRole = modelRoleService.getById(context.getCurrentModelId());
 
             // 获取模型配置（modelname、key）,随机获取一个
-            Model randomModel = permissionService.getRandomModel(context.getUserId());
+            Model modelInfo = permissionService.getModelById(context.getUserId(), context.getCurrentModelId());
             List<String> userTools = permissionService.getUserTools(context.getUserId());
 
             modelConfigContext.save(LlmModelConfiguration.builder()
-                    .id(sysPrompt.getId())
-                    .modelName(randomModel.getName())
-                    .apiKey(randomModel.getModelKey())
-                    .provider(randomModel.getProvider())
-                    .roleName(sysPrompt.getName())
+                    .id(modelRole.getId())
+                    .modelName(modelInfo.getName())
+                    .apiKey(modelInfo.getModelKey())
+                    .provider(modelInfo.getProvider())
+                    .roleName(modelRole.getName())
                     .exposedTools(userTools)
                     .build());
 
