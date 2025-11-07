@@ -29,7 +29,7 @@ public class WebSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         UserContext userContext = (UserContext) session.getAttributes().get("userContext");
-        log.info("【{}】用户发起【{}】会话请求", userContext.getUsername(), session.getAttributes().get(WebSocketConstants.Conversation_Id));
+        log.info("[ {} ] 用户发起 [ {} ] 会话请求", userContext.getUsername(), session.getAttributes().get(WebSocketConstants.Conversation_Id));
         sessionManager.register(userContext.getUserId(), session);
     }
 

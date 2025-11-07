@@ -30,7 +30,7 @@ public class WebSocketSessionManagerImpl implements SessionManager {
             throw new AuthorizationException("会话id未找到");
         }
         sessions.put(userId, session);
-        log.info("【{}】建立会话成功", conversationId);
+        log.info("[ {} ]建立会话成功", conversationId);
     }
 
     @Override
