@@ -28,4 +28,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .eq(User::getUsername, username)
         );
     }
+
+    @Override
+    public long countName(String username) {
+        return count(Wrappers.lambdaQuery(User.class)
+                .eq(User::getUsername, username)
+        );
+    }
 }

@@ -55,8 +55,8 @@ public class AuthServiceImpl implements AuthService {
                 .roles(userRoles)
                 .roleModelIds(userModels)
                 .roleToolIds(userTools)
-                .currentModel(user.getModelId())
-                .currentModelRole(user.getModelRoleId())
+                .currentModel(user.getModel())
+                .currentModelRole(user.getModelRole())
                 .lastUpdated(LocalDateTime.now())
                 .build());
         log.info("[ 用户登录成功 ] : username {}，角色：{}", username, userRoles);
@@ -70,22 +70,17 @@ public class AuthServiceImpl implements AuthService {
         Assert.notNull(email, "email cannot be null");
 
         // 检查用户名是否已存在
-        long count = this.userService.count(Wrappers.lambdaQuery(User.class)
-                .eq(User::getUsername, username)
-        );
-
-        if (count > 0) {
-            throw new BusinessException("用户名已存在");
-        }
+        long count = this.userService.countName(username);
+        if (count > 0) throw new BusinessException("用户名已存在");
 
         // 加密密码
         String encodedPassword = passwordEncoder.encode(password);
-
         User newUser = User.builder()
                 .username(username)
                 .password(encodedPassword)
                 .email(email)
-                .modelId("default")
+                .model("Moonshot-Kimi-K2-Instruct")
+                .modelRole("doctor")
                 .createTime(LocalDateTime.now())
                 .build();
 
@@ -93,7 +88,6 @@ public class AuthServiceImpl implements AuthService {
 
         // 默认赋权
         permissionService.createDefaultRole(newUser.getId());
-
         log.info("用户注册成功：{}", username);
     }
 

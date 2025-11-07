@@ -19,4 +19,11 @@ public interface UserService extends IService<User> {
      * @return  用户
      */
     User getByUserName(String username);
+
+    /**
+     * 根据用户名查询用户数量
+     * @param username 用户名
+     * @return 用户数量
+     */
+    long countName(String username);
 }
