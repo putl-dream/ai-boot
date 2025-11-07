@@ -184,9 +184,7 @@ public class PermissionServiceImpl implements PermissionService {
                 .collect(Collectors.toSet());
 
         // 2. 获取用户角色拥有的工具
-        List<UserRole> userRoles = userRoleMapper.selectList(
-                new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, userId)
-        );
+        List<UserRole> userRoles = userRoleService.selectByUserId(userId);
 
         if (!userRoles.isEmpty()) {
             List<String> roleIds = userRoles.stream()
@@ -229,8 +227,6 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Model getModelById(String userId, String modelId) {
-        log.info("[ 用户模型权限校验 ] : 用户{} ，模型 {}", userId, modelId);
-
         List<String> modelIdsByUserId = getModelIdsByUserId(userId);
         Assert.notNull(modelIdsByUserId, "用户没有模型权限");
 
@@ -239,6 +235,16 @@ public class PermissionServiceImpl implements PermissionService {
         }
 
         return modelService.getById(modelId);
+    }
+
+    @Override
+    public Model getModelByModelName(String userId, String modelName) {
+        log.info("[ 用户模型权限校验 ] : 用户{} ，模型 {}", userId, modelName);
+
+        Model model = modelService.getByName(modelName);
+        Assert.notNull(model, "模型不存在");
+
+        return getModelById(userId, model.getId());
     }
 
     @Override
