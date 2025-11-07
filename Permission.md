@@ -27,3 +27,26 @@
 用户登录时，token 校验通过后，校验鉴权版本号是否与系统版本信息一致。如果不一致返回指定code，让前台动态刷新token，更新redis权限信息。
 
 权限版本信息一致，通过redis查询用户权限信息，比对版本信息，一致直接使用，否者从数据库查询权限信息，并更新redis。
+
+## 数据层权限管理 ABAC
+数据级鉴权基于属性（如数据的所有者、类型、标签）判断，通常结合ABAC（Attribute-Based Access Control）或行级安全（Row-Level Security）。这能防止越权查询或修改数据库记录。
+```java
+// Service 或 Mapper 查询时
+String sql = "SELECT * FROM model_types WHERE 1=1";
+
+// 1. 普通用户：只能看自己的 + 公开的
+if (!user.isAdmin()) {
+    sql += " AND (owner_id = #{userId} OR access_level = 'public')";
+}
+
+// 2. 管理员：无限制
+// if (user.isAdmin()) → 不加任何条件
+
+// 3. 组内共享（可选）
+if (user.hasGroup(1001)) {
+    sql += " AND (group_id = 1001 OR access_level IN ('group', 'public'))";
+}
+```
+
+> 数据鉴权是在数据Mapper层中添加限制条件来处理数据鉴权 \
+> 数据层的鉴权校验，不是判断用户是否权限，而是你只能获取这些限制条件下的数据
