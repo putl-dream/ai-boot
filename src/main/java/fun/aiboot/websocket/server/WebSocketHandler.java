@@ -3,6 +3,7 @@ package fun.aiboot.websocket.server;
 import fun.aiboot.common.context.UserContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
@@ -48,9 +49,9 @@ public class WebSocketHandler extends AbstractWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        log.warn("连接关闭：{}", status.getReason());
+    public void afterConnectionClosed(WebSocketSession session, @NotNull CloseStatus status) throws Exception {
         UserContext userContext = (UserContext) session.getAttributes().get("userContext");
+        log.warn("[ {} ] 用户关闭 [ {} ] 会话, info {}", userContext.getUsername(), session.getAttributes().get(WebSocketConstants.Conversation_Id), status);
         sessionManager.remove(userContext.getUserId());
     }
 

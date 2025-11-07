@@ -5,7 +5,6 @@ import fun.aiboot.dialogue.llm.LLMService;
 import fun.aiboot.dialogue.llm.context.DialogueContext;
 import fun.aiboot.dialogue.llm.context.LlmPromptContext;
 import fun.aiboot.dialogue.llm.context.LlmPromptContextProvider;
-import fun.aiboot.dialogue.llm.context.MySQLDialogueContext;
 import fun.aiboot.dialogue.llm.function.ToolsGlobalRegistry;
 import fun.aiboot.dialogue.llm.model.ChatModelFactory;
 import fun.aiboot.dialogue.llm.persona.PersonaProvider;
@@ -49,6 +48,7 @@ public class DefaultLLMServiceImpl implements LLMService {
 
     @Override
     public Flux<String> stream(String userId, String modelId, String message) {
+        log.info("[ 用户消息 ] 用户 {} : \n{}\n", userId, message);
         dialogueContext.addMessage(userId, new UserMessage(message));
         Prompt prompt = buildPrompt(userId, modelId, message);
         ChatModel chatModel = buildModel();
@@ -69,7 +69,7 @@ public class DefaultLLMServiceImpl implements LLMService {
                 })
                 .doOnNext(token -> log.debug("Streaming token: {}", token))
                 .doOnComplete(() -> {
-                    log.info("Response: \n{}\n", responseBuilder);
+                    log.info("[ 模型消息 ] 角色：{}，模型：{} : \n{}\n", bound.config().getRoleName(), bound.config().getModelName(), responseBuilder);
                     dialogueContext.addMessage(userId, new AssistantMessage(responseBuilder.toString()));
                 })
                 .doOnError(error -> log.error("Stream error for user {}: {}", userId, error.getMessage(), error));
