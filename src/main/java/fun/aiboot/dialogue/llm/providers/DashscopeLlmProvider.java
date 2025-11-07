@@ -82,6 +82,7 @@ public class DashscopeLlmProvider implements ChatModel {
         }
 
         public DashscopeLlmProvider build() {
+            if (tools == null || tools.isEmpty()) tools = null;
             return new DashscopeLlmProvider(modelName, apiKey, toolCallingManager, tools);
         }
     }

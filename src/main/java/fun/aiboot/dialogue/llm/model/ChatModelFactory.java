@@ -11,6 +11,7 @@ import org.springframework.ai.tool.ToolCallback;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Builder
 public class ChatModelFactory {
@@ -45,6 +46,7 @@ public class ChatModelFactory {
         Map<String, ToolCallback> allFunctions = toolsGlobalRegistry.getAllFunctions();
         return exposedTools.stream()
                 .map(allFunctions::get)
+                .filter(Objects::nonNull)
                 .toList();
     }
 }

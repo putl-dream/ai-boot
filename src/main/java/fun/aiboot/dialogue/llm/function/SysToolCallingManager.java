@@ -2,6 +2,7 @@ package fun.aiboot.dialogue.llm.function;
 
 import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
@@ -27,6 +28,9 @@ import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
+/**
+ * 系统工具调用管理器
+ */
 @Slf4j
 @Component
 public class SysToolCallingManager implements ToolCallingManager {
@@ -39,9 +43,10 @@ public class SysToolCallingManager implements ToolCallingManager {
 
     private final ToolExecutionExceptionProcessor toolExecutionExceptionProcessor;
 
-    private ToolCallingObservationConvention observationConvention = DEFAULT_OBSERVATION_CONVENTION;
+    private final ToolCallingObservationConvention observationConvention = DEFAULT_OBSERVATION_CONVENTION;
 
-    public SysToolCallingManager(ObservationRegistry observationRegistry, ToolCallbackResolver toolCallbackResolver,
+    public SysToolCallingManager(ObservationRegistry observationRegistry,
+                                 ToolCallbackResolver toolCallbackResolver,
                                  ToolExecutionExceptionProcessor toolExecutionExceptionProcessor) {
         Assert.notNull(observationRegistry, "observationRegistry cannot be null");
         Assert.notNull(toolCallbackResolver, "toolCallbackResolver cannot be null");
@@ -53,10 +58,9 @@ public class SysToolCallingManager implements ToolCallingManager {
     }
 
 
+    @NotNull
     @Override
-    public List<ToolDefinition> resolveToolDefinitions(ToolCallingChatOptions chatOptions) {
-        Assert.notNull(chatOptions, "chatOptions cannot be null");
-
+    public List<ToolDefinition> resolveToolDefinitions(@NotNull ToolCallingChatOptions chatOptions) {
         List<ToolCallback> toolCallbacks = new ArrayList<>(chatOptions.getToolCallbacks());
         for (String toolName : chatOptions.getToolNames()) {
             // Skip the function if it is already present in the request toolCallbacks.
@@ -76,11 +80,9 @@ public class SysToolCallingManager implements ToolCallingManager {
         return toolCallbacks.stream().map(ToolCallback::getToolDefinition).toList();
     }
 
+    @NotNull
     @Override
-    public ToolExecutionResult executeToolCalls(Prompt prompt, ChatResponse chatResponse) {
-        Assert.notNull(prompt, "prompt cannot be null");
-        Assert.notNull(chatResponse, "chatResponse cannot be null");
-
+    public ToolExecutionResult executeToolCalls(@NotNull Prompt prompt, @NotNull ChatResponse chatResponse) {
         // 查看需要执行的tool
         Optional<Generation> toolCallGeneration = chatResponse.getResults()
                 .stream()
