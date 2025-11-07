@@ -88,7 +88,7 @@ public class AuthServiceImpl implements AuthService {
 
         // 默认赋权
         permissionService.createDefaultRole(newUser.getId());
-        log.info("用户注册成功：{}", username);
+        log.info("[ 用户注册成功 ]：username {}", username);
     }
 
     @Override

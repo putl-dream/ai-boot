@@ -18,7 +18,6 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
@@ -40,7 +39,11 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
                                    WebSocketHandler wsHandler,
                                    Map<String, Object> attributes) {
 
-        if (request instanceof ServletServerHttpRequest servletRequest) {
+        if (!(request instanceof ServletServerHttpRequest servletRequest)) {
+            return false;
+        }
+
+        try {
             HttpServletRequest httpRequest = servletRequest.getServletRequest();
             String token = httpRequest.getHeader(WebSocketConstants.Auth_Header);
             String conversationId = httpRequest.getHeader(WebSocketConstants.Conversation_Id);
@@ -62,13 +65,11 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
             if (context == null) {
                 log.warn("WebSocket authentication failed: invalid token");
                 response.setStatusCode(HttpStatusCode.valueOf(401));
+                return false;
             }
 
-            Assert.notNull(context, "User information cannot be empty");
-            ModelRole modelRole = modelRoleService.getById(context.getCurrentModelId());
-
-            // 获取模型配置（modelname、key）,随机获取一个
-            Model modelInfo = permissionService.getModelById(context.getUserId(), context.getCurrentModelId());
+            ModelRole modelRole = modelRoleService.getByName(context.getCurrentModelRole());
+            Model modelInfo = permissionService.getModelByModelName(context.getUserId(), context.getCurrentModel());
             List<String> userTools = permissionService.getUserTools(context.getUserId());
 
             modelConfigContext.save(LlmModelConfiguration.builder()
@@ -83,11 +84,14 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
             // 将用户信息存储到attributes中,可以跨线程使用
             attributes.put(WebSocketConstants.User_Context, context);
             attributes.put(WebSocketConstants.Conversation_Id, conversationId);
-            Assert.notNull(context, "User information cannot be empty");
-            log.info("【{}】The user identity verification has been passed", context.getUsername());
-            return true;
+            log.info("[ {} ]The user identity verification has been passed", context.getUsername());
+        } catch (Exception e) {
+            log.error("token解析失败：{}", e.getMessage());
+            response.setStatusCode(HttpStatusCode.valueOf(401));
+            return false;
         }
-        return false;
+
+        return true;
     }
 
     @Override

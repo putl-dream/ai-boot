@@ -70,5 +70,13 @@ public interface PermissionService {
      */
     Model getModelById(String userId, String modelId);
 
+    /**
+     * 获取模型信息
+     * @param userId 用户ID
+     * @param modelName 模型名称
+     * @return 模型信息
+     */
+    Model getModelByModelName(String userId, String modelName);
+
     boolean canAccessModel(String userId, LlmModelConfiguration config);
 }
