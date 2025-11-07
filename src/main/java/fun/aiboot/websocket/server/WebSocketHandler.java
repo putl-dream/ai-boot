@@ -29,20 +29,20 @@ public class WebSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         UserContext userContext = (UserContext) session.getAttributes().get("userContext");
-        log.info("[ {} ] 用户发起 [ {} ] 会话请求", userContext.getUsername(), session.getAttributes().get(WebSocketConstants.Conversation_Id));
+        log.debug("[ {} ] 用户发起 [ {} ] 会话请求", userContext.getUsername(), session.getAttributes().get(WebSocketConstants.Conversation_Id));
         sessionManager.register(userContext.getUserId(), session);
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        log.info("接收到文本消息：\n{}", message.getPayload());
+        log.debug("接收到文本消息：\n{}", message.getPayload());
         UserContext userContext = (UserContext) session.getAttributes().get("userContext");
         messageRouter.route(userContext.getUserId(), message.getPayload());
     }
 
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
-        log.info("接收到二进制消息：{}", message.getPayload());
+        log.debug("接收到二进制消息：{}", message.getPayload());
         UserContext userContext = (UserContext) session.getAttributes().get("userContext");
         messageRouter.route(userContext.getUserId(), message.getPayload().toString());
     }

@@ -239,7 +239,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Model getModelByModelName(String userId, String modelName) {
-        log.info("[ 用户模型权限校验 ] : 用户{} ，模型 {}", userId, modelName);
+        log.info("[ 用户使用模型权限校验 ] : 用户 {} ，模型 {}", userId, modelName);
 
         Model model = modelService.getByName(modelName);
         Assert.notNull(model, "模型不存在");

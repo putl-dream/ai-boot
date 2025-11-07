@@ -84,7 +84,7 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
             // 将用户信息存储到attributes中,可以跨线程使用
             attributes.put(WebSocketConstants.User_Context, context);
             attributes.put(WebSocketConstants.Conversation_Id, conversationId);
-            log.info("[ {} ] 用户身份验证已通过", context.getUsername());
+            log.debug("[ {} ] 用户身份验证通过", context.getUsername());
         } catch (Exception e) {
             log.error("token解析失败：{}", e.getMessage());
             response.setStatusCode(HttpStatusCode.valueOf(401));

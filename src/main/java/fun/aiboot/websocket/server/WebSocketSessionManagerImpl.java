@@ -1,5 +1,6 @@
 package fun.aiboot.websocket.server;
 
+import fun.aiboot.common.context.UserContext;
 import fun.aiboot.common.exception.AuthorizationException;
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,8 @@ public class WebSocketSessionManagerImpl implements SessionManager {
             throw new AuthorizationException("会话id未找到");
         }
         sessions.put(userId, session);
-        log.info("[ {} ]建立会话成功", conversationId);
+        UserContext userContext = (UserContext) session.getAttributes().get(WebSocketConstants.User_Context);
+        log.info("[ {} ] 建立 [ {} ] 会话请求成功", userContext.getUsername(), session.getAttributes().get(WebSocketConstants.Conversation_Id));
     }
 
     @Override
