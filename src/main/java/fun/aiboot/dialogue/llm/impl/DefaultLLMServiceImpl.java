@@ -69,7 +69,7 @@ public class DefaultLLMServiceImpl implements LLMService {
                 })
                 .doOnNext(token -> log.debug("Streaming token: {}", token))
                 .doOnComplete(() -> {
-                    log.info("Response: {}", responseBuilder);
+                    log.info("Response: \n{}\n", responseBuilder);
                     dialogueContext.addMessage(userId, new AssistantMessage(responseBuilder.toString()));
                 })
                 .doOnError(error -> log.error("Stream error for user {}: {}", userId, error.getMessage(), error));

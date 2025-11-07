@@ -1,11 +1,11 @@
 package fun.aiboot.servicews;
 
+import fun.aiboot.dialogue.llm.LLMService;
 import fun.aiboot.websocket.domain.BaseMessage;
 import fun.aiboot.websocket.domain.ChatMessage;
 import fun.aiboot.websocket.domain.FormType;
 import fun.aiboot.websocket.server.MessageHandler;
 import fun.aiboot.websocket.server.MessagePublisher;
-import fun.aiboot.dialogue.llm.LLMService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -49,7 +49,6 @@ public class ChatService implements MessageHandler {
                     messagePublisher.sendToUser(userId, errorMsg);
                 })
                 .doOnComplete(() -> {
-                    log.info("流式响应完成 userId={} messageId={}", userId, messageId);
                     ChatMessage completeMsg = ChatMessage.successEnd(FormType.SYSTEM, "生成响应完成");
                     messagePublisher.sendToUser(userId, completeMsg);
                 })
