@@ -337,7 +337,7 @@ OpenAI 模型的实现。
 ##### ToolsGlobalRegistry
 全局工具注册表，管理所有可用的 Function Calling 工具。
 
-**位置**: `fun.aiboot.dialogue.llm.function.ToolsGlobalRegistry`
+**位置**: `fun.aiboot.dialogue.llm.tool.GlobalToolRegistry`
 
 **功能**:
 - 注册/注销工具
@@ -366,7 +366,7 @@ public class ToolsGlobalRegistry implements ToolCallbackResolver {
 ##### GlobalFunction
 全局工具接口，所有工具需实现此接口。
 
-**位置**: `fun.aiboot.dialogue.llm.function.GlobalFunction`
+**位置**: `fun.aiboot.dialogue.llm.tool.GlobalTool`
 
 ```java
 public interface GlobalFunction {

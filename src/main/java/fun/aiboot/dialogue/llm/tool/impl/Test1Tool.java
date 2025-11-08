@@ -1,7 +1,7 @@
-package fun.aiboot.dialogue.llm.function.function;
+package fun.aiboot.dialogue.llm.tool.impl;
 
-import fun.aiboot.dialogue.llm.function.GlobalFunction;
-import fun.aiboot.dialogue.llm.function.ToolCallStringResultConverter;
+import fun.aiboot.dialogue.llm.tool.GlobalTool;
+import fun.aiboot.dialogue.llm.tool.GlobalToolResult;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.function.FunctionToolCallback;
@@ -11,10 +11,15 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class Test1Function implements GlobalFunction {
+public class Test1Tool implements GlobalTool {
     @Override
     public ToolCallback getFunctionCallTool() {
         return toolCallback;
+    }
+
+    @Override
+    public String getPermission() {
+        return "tool:huiben";
     }
 
     ToolCallback toolCallback = FunctionToolCallback
@@ -37,6 +42,6 @@ public class Test1Function implements GlobalFunction {
                         }
                     """)
             .inputType(Map.class)
-            .toolCallResultConverter(ToolCallStringResultConverter.INSTANCE)
+            .toolCallResultConverter(GlobalToolResult.INSTANCE)
             .build();
 }

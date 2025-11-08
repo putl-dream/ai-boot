@@ -19,7 +19,7 @@ public class ToolServiceTest {
     void testSaveTool() {
         Tool tool = Tool.builder()
                 .name("calculator")
-                .description("A simple calculator function")
+                .description("A simple calculator impl")
                 .build();
         
         boolean saved = toolService.save(tool);
@@ -29,10 +29,10 @@ public class ToolServiceTest {
 
     @Test
     void testGetToolById() {
-        // First save a function
+        // First save a impl
         Tool tool = Tool.builder()
                 .name("calculator")
-                .description("A simple calculator function")
+                .description("A simple calculator impl")
                 .build();
         toolService.save(tool);
         
@@ -40,6 +40,6 @@ public class ToolServiceTest {
         Tool retrieved = toolService.getById(tool.getId());
         assertNotNull(retrieved);
         assertEquals("calculator", retrieved.getName());
-        assertEquals("A simple calculator function", retrieved.getDescription());
+        assertEquals("A simple calculator impl", retrieved.getDescription());
     }
 }

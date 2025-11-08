@@ -74,7 +74,7 @@ public class PermissionServiceImpl implements PermissionService {
             defaultTool = Tool.builder()
                     .id("default")
                     .name("default")
-                    .type("function")
+                    .type("impl")
                     .config("{}")
                     .description("默认工具")
                     .build();
@@ -98,9 +98,9 @@ public class PermissionServiceImpl implements PermissionService {
                     .modelId(defaultModel.getId())
                     .build());
         }
-        log.info("初始化默认角色: {}", defaultRole);
-        log.info("初始化默认模型: {}", defaultModel);
-        log.info("初始化默认工具: {}", defaultTool);
+        log.debug("初始化默认角色: {}", defaultRole);
+        log.debug("初始化默认模型: {}", defaultModel);
+        log.debug("初始化默认工具: {}", defaultTool);
     }
 
 

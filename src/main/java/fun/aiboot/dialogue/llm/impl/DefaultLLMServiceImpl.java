@@ -5,7 +5,7 @@ import fun.aiboot.dialogue.llm.LLMService;
 import fun.aiboot.dialogue.llm.context.DialogueContext;
 import fun.aiboot.dialogue.llm.context.LlmPromptContext;
 import fun.aiboot.dialogue.llm.context.LlmPromptContextProvider;
-import fun.aiboot.dialogue.llm.function.ToolsGlobalRegistry;
+import fun.aiboot.dialogue.llm.tool.GlobalToolRegistry;
 import fun.aiboot.dialogue.llm.model.ChatModelFactory;
 import fun.aiboot.dialogue.llm.persona.PersonaProvider;
 import fun.aiboot.services.PermissionService;
@@ -30,7 +30,7 @@ public class DefaultLLMServiceImpl implements LLMService {
     private final PermissionService permissionService;
     private final PersonaProvider personaProvider;
     private final ToolCallingManager toolCallingManager;
-    private final ToolsGlobalRegistry toolsGlobalRegistry;
+    private final GlobalToolRegistry globalToolRegistry;
     private final DialogueContext dialogueContext;
 
     private LlmPromptContext bound;
@@ -108,7 +108,7 @@ public class DefaultLLMServiceImpl implements LLMService {
     private ChatModel buildModel() {
         return ChatModelFactory.builder()
                 .llmModelConfiguration(bound.config())
-                .toolsGlobalRegistry(toolsGlobalRegistry)
+                .globalToolRegistry(globalToolRegistry)
                 .toolCallingManager(toolCallingManager)
                 .build()
                 .takeChatModel();

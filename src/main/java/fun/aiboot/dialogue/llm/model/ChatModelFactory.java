@@ -1,7 +1,7 @@
 package fun.aiboot.dialogue.llm.model;
 
 import fun.aiboot.dialogue.llm.config.LlmModelConfiguration;
-import fun.aiboot.dialogue.llm.function.ToolsGlobalRegistry;
+import fun.aiboot.dialogue.llm.tool.GlobalToolRegistry;
 import fun.aiboot.dialogue.llm.providers.DashscopeLlmProvider;
 import fun.aiboot.dialogue.llm.providers.OpenAiLlmProvider;
 import lombok.Builder;
@@ -18,7 +18,7 @@ public class ChatModelFactory {
 
     private LlmModelConfiguration llmModelConfiguration;
     private ToolCallingManager toolCallingManager;
-    private ToolsGlobalRegistry toolsGlobalRegistry;
+    private GlobalToolRegistry globalToolRegistry;
 
     // 使用工厂模式创建模型实例，预留可扩展
     public ChatModel takeChatModel() {
@@ -43,7 +43,7 @@ public class ChatModelFactory {
     private List<ToolCallback> mapToolCallback(List<String> exposedTools) {
         if (null == exposedTools || exposedTools.isEmpty()) return null;
 
-        Map<String, ToolCallback> allFunctions = toolsGlobalRegistry.getAllFunctions();
+        Map<String, ToolCallback> allFunctions = globalToolRegistry.getAllFunctions();
         return exposedTools.stream()
                 .map(allFunctions::get)
                 .filter(Objects::nonNull)

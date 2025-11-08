@@ -1,4 +1,4 @@
-package fun.aiboot.dialogue.llm.function;
+package fun.aiboot.dialogue.llm.tool;
 
 import com.alibaba.fastjson2.JSON;
 import org.jetbrains.annotations.NotNull;
@@ -9,11 +9,11 @@ import java.lang.reflect.Type;
 /**
  * 函数返回结果转换器
  */
-public class ToolCallStringResultConverter implements ToolCallResultConverter {
+public class GlobalToolResult implements ToolCallResultConverter {
 
-    public static final ToolCallStringResultConverter INSTANCE = new ToolCallStringResultConverter();
+    public static final GlobalToolResult INSTANCE = new GlobalToolResult();
 
-    private ToolCallStringResultConverter() {
+    private GlobalToolResult() {
         // Private constructor to enforce singleton pattern
     }
 

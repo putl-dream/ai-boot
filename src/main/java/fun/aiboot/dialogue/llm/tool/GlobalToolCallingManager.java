@@ -1,4 +1,4 @@
-package fun.aiboot.dialogue.llm.function;
+package fun.aiboot.dialogue.llm.tool;
 
 import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
@@ -33,21 +33,19 @@ import java.util.*;
  */
 @Slf4j
 @Component
-public class SysToolCallingManager implements ToolCallingManager {
-    private static final ToolCallingObservationConvention DEFAULT_OBSERVATION_CONVENTION
-            = new DefaultToolCallingObservationConvention();
-
-    private final ObservationRegistry observationRegistry;
-
-    private final ToolCallbackResolver toolCallbackResolver;
-
-    private final ToolExecutionExceptionProcessor toolExecutionExceptionProcessor;
-
+public class GlobalToolCallingManager implements ToolCallingManager {
+    private static final ToolCallingObservationConvention DEFAULT_OBSERVATION_CONVENTION = new DefaultToolCallingObservationConvention();
     private final ToolCallingObservationConvention observationConvention = DEFAULT_OBSERVATION_CONVENTION;
 
-    public SysToolCallingManager(ObservationRegistry observationRegistry,
-                                 ToolCallbackResolver toolCallbackResolver,
-                                 ToolExecutionExceptionProcessor toolExecutionExceptionProcessor) {
+    private final ObservationRegistry observationRegistry;
+    private final ToolCallbackResolver toolCallbackResolver;
+    private final ToolExecutionExceptionProcessor toolExecutionExceptionProcessor;
+    private final GlobalToolRegistry globalToolRegistry;
+
+    public GlobalToolCallingManager(ObservationRegistry observationRegistry,
+                                    ToolCallbackResolver toolCallbackResolver,
+                                    ToolExecutionExceptionProcessor toolExecutionExceptionProcessor,
+                                    GlobalToolRegistry globalToolRegistry) {
         Assert.notNull(observationRegistry, "observationRegistry cannot be null");
         Assert.notNull(toolCallbackResolver, "toolCallbackResolver cannot be null");
         Assert.notNull(toolExecutionExceptionProcessor, "toolCallExceptionConverter cannot be null");
@@ -55,6 +53,7 @@ public class SysToolCallingManager implements ToolCallingManager {
         this.observationRegistry = observationRegistry;
         this.toolCallbackResolver = toolCallbackResolver;
         this.toolExecutionExceptionProcessor = toolExecutionExceptionProcessor;
+        this.globalToolRegistry = globalToolRegistry;
     }
 
 
@@ -63,9 +62,9 @@ public class SysToolCallingManager implements ToolCallingManager {
     public List<ToolDefinition> resolveToolDefinitions(@NotNull ToolCallingChatOptions chatOptions) {
         List<ToolCallback> toolCallbacks = new ArrayList<>(chatOptions.getToolCallbacks());
         for (String toolName : chatOptions.getToolNames()) {
-            // Skip the function if it is already present in the request toolCallbacks.
-            // That might happen if a function is defined in the options
-            // both as a ToolCallback and as a function name.
+            // Skip the impl if it is already present in the request toolCallbacks.
+            // That might happen if a impl is defined in the options
+            // both as a ToolCallback and as a impl name.
             if (chatOptions.getToolCallbacks()
                     .stream()
                     .anyMatch(tool -> tool.getToolDefinition().name().equals(toolName))) {
@@ -73,10 +72,13 @@ public class SysToolCallingManager implements ToolCallingManager {
             }
             ToolCallback toolCallback = this.toolCallbackResolver.resolve(toolName);
             if (toolCallback == null) {
-                throw new IllegalStateException("No ToolCallback found for function name: " + toolName);
+                throw new IllegalStateException("No ToolCallback found for impl name: " + toolName);
             }
             toolCallbacks.add(toolCallback);
         }
+
+
+
         return toolCallbacks.stream().map(ToolCallback::getToolDefinition).toList();
     }
 
@@ -90,7 +92,7 @@ public class SysToolCallingManager implements ToolCallingManager {
                 .findFirst();
 
         if (toolCallGeneration.isEmpty()) {
-            throw new IllegalStateException("No function call requested by the chat model");
+            throw new IllegalStateException("No impl call requested by the chat model");
         }
 
         // 构建工具上下文
@@ -101,7 +103,7 @@ public class SysToolCallingManager implements ToolCallingManager {
 
             AssistantMessage toolCallMessage = new AssistantMessage(assistantMessage.getText(), assistantMessage.getMetadata(), List.of(toolCall));
             ToolContext toolContext = buildToolContext(prompt, assistantMessage);
-            SysToolCallingManager.InternalToolExecutionResult internalToolExecutionResult = executeToolCall(prompt, toolCallMessage, toolContext);
+            GlobalToolCallingManager.InternalToolExecutionResult internalToolExecutionResult = executeToolCall(prompt, toolCallMessage, toolContext);
 
             ToolResponseMessage toolResponseMessage = internalToolExecutionResult.toolResponseMessage();
             conversationHistory.add(assistantMessage);
@@ -143,7 +145,7 @@ public class SysToolCallingManager implements ToolCallingManager {
     /**
      * 执行工具调用并返回响应消息。
      */
-    private SysToolCallingManager.InternalToolExecutionResult executeToolCall(Prompt prompt, AssistantMessage assistantMessage, ToolContext toolContext) {
+    private GlobalToolCallingManager.InternalToolExecutionResult executeToolCall(Prompt prompt, AssistantMessage assistantMessage, ToolContext toolContext) {
         // 获取工具调用
         List<ToolCallback> toolCallbacks = List.of();
         if (prompt.getOptions() instanceof ToolCallingChatOptions toolCallingChatOptions) {
@@ -190,7 +192,7 @@ public class SysToolCallingManager implements ToolCallingManager {
                     toolCallResult != null ? toolCallResult : ""));
         }
 
-        return new SysToolCallingManager.InternalToolExecutionResult(new ToolResponseMessage(toolResponses, Map.of()), true);
+        return new GlobalToolCallingManager.InternalToolExecutionResult(new ToolResponseMessage(toolResponses, Map.of()), true);
     }
 
 

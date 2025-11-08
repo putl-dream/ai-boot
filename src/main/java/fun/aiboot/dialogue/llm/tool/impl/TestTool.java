@@ -1,7 +1,7 @@
-package fun.aiboot.dialogue.llm.function.function;
+package fun.aiboot.dialogue.llm.tool.impl;
 
-import fun.aiboot.dialogue.llm.function.GlobalFunction;
-import fun.aiboot.dialogue.llm.function.ToolCallStringResultConverter;
+import fun.aiboot.dialogue.llm.tool.GlobalTool;
+import fun.aiboot.dialogue.llm.tool.GlobalToolResult;
 import org.springframework.ai.chat.model.ToolContext;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.function.FunctionToolCallback;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 @Component
-public class TestFunction implements GlobalFunction {
+public class TestTool implements GlobalTool {
     @Override
     public ToolCallback getFunctionCallTool() {
         return FunctionToolCallback.builder("func_weather", (Map<String, String> params, ToolContext toolContext) -> {
@@ -35,7 +35,12 @@ public class TestFunction implements GlobalFunction {
                             "required": ["city"]
                         }
                         """).inputType(Map.class)
-                .toolCallResultConverter(ToolCallStringResultConverter.INSTANCE)
+                .toolCallResultConverter(GlobalToolResult.INSTANCE)
                 .build();
+    }
+
+    @Override
+    public String getPermission() {
+        return "tool:weather";
     }
 }
