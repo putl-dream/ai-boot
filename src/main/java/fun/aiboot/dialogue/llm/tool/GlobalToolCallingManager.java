@@ -1,5 +1,7 @@
 package fun.aiboot.dialogue.llm.tool;
 
+import fun.aiboot.common.context.UserContext;
+import fun.aiboot.common.context.UserContextHolder;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -40,12 +42,10 @@ public class GlobalToolCallingManager implements ToolCallingManager {
     private final ObservationRegistry observationRegistry;
     private final ToolCallbackResolver toolCallbackResolver;
     private final ToolExecutionExceptionProcessor toolExecutionExceptionProcessor;
-    private final GlobalToolRegistry globalToolRegistry;
 
     public GlobalToolCallingManager(ObservationRegistry observationRegistry,
                                     ToolCallbackResolver toolCallbackResolver,
-                                    ToolExecutionExceptionProcessor toolExecutionExceptionProcessor,
-                                    GlobalToolRegistry globalToolRegistry) {
+                                    ToolExecutionExceptionProcessor toolExecutionExceptionProcessor) {
         Assert.notNull(observationRegistry, "observationRegistry cannot be null");
         Assert.notNull(toolCallbackResolver, "toolCallbackResolver cannot be null");
         Assert.notNull(toolExecutionExceptionProcessor, "toolCallExceptionConverter cannot be null");
@@ -53,7 +53,6 @@ public class GlobalToolCallingManager implements ToolCallingManager {
         this.observationRegistry = observationRegistry;
         this.toolCallbackResolver = toolCallbackResolver;
         this.toolExecutionExceptionProcessor = toolExecutionExceptionProcessor;
-        this.globalToolRegistry = globalToolRegistry;
     }
 
 
@@ -77,6 +76,7 @@ public class GlobalToolCallingManager implements ToolCallingManager {
             toolCallbacks.add(toolCallback);
         }
 
+        UserContext userContext = UserContextHolder.get();
 
 
         return toolCallbacks.stream().map(ToolCallback::getToolDefinition).toList();

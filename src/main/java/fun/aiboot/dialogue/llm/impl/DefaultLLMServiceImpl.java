@@ -5,9 +5,9 @@ import fun.aiboot.dialogue.llm.LLMService;
 import fun.aiboot.dialogue.llm.context.DialogueContext;
 import fun.aiboot.dialogue.llm.context.LlmPromptContext;
 import fun.aiboot.dialogue.llm.context.LlmPromptContextProvider;
-import fun.aiboot.dialogue.llm.tool.GlobalToolRegistry;
 import fun.aiboot.dialogue.llm.model.ChatModelFactory;
 import fun.aiboot.dialogue.llm.persona.PersonaProvider;
+import fun.aiboot.dialogue.llm.tool.GlobalToolRegistry;
 import fun.aiboot.services.PermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +18,12 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.tool.ToolCallingManager;
+import org.springframework.ai.tool.ToolCallback;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -39,8 +43,8 @@ public class DefaultLLMServiceImpl implements LLMService {
     @Override
     public String chat(String userId, String modelId, String message) {
         Prompt prompt = buildPrompt(userId, modelId, message);
-
-        ChatModel chatModel = buildModel();
+        List<ToolCallback> toolCallbacks = buildToolCallbacks(userId);
+        ChatModel chatModel = buildModel(toolCallbacks);
 
         ChatResponse call = chatModel.call(prompt);
         return call.getResult().getOutput().getText();
@@ -50,8 +54,10 @@ public class DefaultLLMServiceImpl implements LLMService {
     public Flux<String> stream(String userId, String modelId, String message) {
         log.info("[ 用户消息 ] 用户 {} : \n{}\n", userId, message);
         dialogueContext.addMessage(userId, new UserMessage(message));
+
         Prompt prompt = buildPrompt(userId, modelId, message);
-        ChatModel chatModel = buildModel();
+        List<ToolCallback> toolCallbacks = buildToolCallbacks(userId);
+        ChatModel chatModel = buildModel(toolCallbacks);
 
         // 全量内容
         StringBuilder responseBuilder = new StringBuilder();
@@ -105,10 +111,18 @@ public class DefaultLLMServiceImpl implements LLMService {
         return new Prompt(bound.context());
     }
 
-    private ChatModel buildModel() {
+    private List<ToolCallback> buildToolCallbacks(String userId) {
+        List<String> userTools = permissionService.getUserTools(userId);
+
+        Map<String, ToolCallback> toolsByNames = globalToolRegistry.getToolsByNames(userTools);
+        return toolsByNames.values().stream().toList();
+    }
+
+
+    private ChatModel buildModel(List<ToolCallback> toolCallbacks) {
         return ChatModelFactory.builder()
                 .llmModelConfiguration(bound.config())
-                .globalToolRegistry(globalToolRegistry)
+                .toolCallbacks(toolCallbacks)
                 .toolCallingManager(toolCallingManager)
                 .build()
                 .takeChatModel();

@@ -1,6 +1,7 @@
 package fun.aiboot.dialogue.llm.tool;
 
 import fun.aiboot.entity.Tool;
+import fun.aiboot.service.ToolService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +27,8 @@ public class GlobalToolRegistry implements ToolCallbackResolver {
 
     @Resource
     protected List<GlobalTool> globalTools;
+    @Resource
+    private ToolService toolService;
 
     @PostConstruct
     private void initTools() {
@@ -40,11 +43,19 @@ public class GlobalToolRegistry implements ToolCallbackResolver {
 
             registerFunction(toolCallback.getToolDefinition().name(), toolCallback);
             registerPermission(toolCallback, permission);
+            log.info("[{}] tool :{} 成功注册到全局", TAG, toolCallback.getToolDefinition().name());
         }
     }
 
+
     public Map<String, ToolCallback> getAllFunctions() {
         return allFunction;
+    }
+
+    public Map<String, ToolCallback> getToolsByNames(List<String> names) {
+        return allFunction.entrySet().stream()
+                .filter(entry -> names.contains(entry.getKey()))
+                .collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public Map<String, Tool> getAllPermission() {
@@ -83,7 +94,7 @@ public class GlobalToolRegistry implements ToolCallbackResolver {
                 .config(toolDefinition.inputSchema())
                 .description(toolDefinition.description())
                 .build();
-
+        toolService.save(tool);
         allPermission.putIfAbsent(permission, tool);
         log.debug("[{}] 权限:{} 成功注册到全局", TAG, tool.getName());
     }

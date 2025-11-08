@@ -15,7 +15,7 @@ public class LlmPromptContextProvider {
      * 组合模型配置与上下文信息，生成可运行环境
      */
     public LlmPromptContext bind(String userId, String modelId) {
-        LlmModelConfiguration llmModelConfiguration = modelConfigContext.get(modelId);
+        final LlmModelConfiguration llmModelConfiguration = modelConfigContext.get(modelId);
 
         return new LlmPromptContext(llmModelConfiguration, dialogueContext.getMessages(userId, 10));
     }
