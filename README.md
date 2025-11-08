@@ -34,26 +34,42 @@
 1. **克隆项目**
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/putl-dream/ai-boot.git
 cd ai-boot
 ```
 
 2. **配置环境**
 
-设置环境变量：
+创建或编辑环境变量：
+
 ```bash
-export DASHSCOPE_API_KEY=your-api-key-here
+# 必需的环境变量
+export DASHSCOPE_API_KEY=your-dashscope-api-key-here
 export mysql_pwd=your-mysql-password
+
+# 可选的环境变量（如果使用 OpenAI）
+export OPENAI_API_KEY=your-openai-api-key-here
 ```
 
-或在 `src/main/resources/application.yaml` 中配置数据库密码：
+或直接在 `src/main/resources/application.yaml` 中配置：
+
 ```yaml
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/ai_boot?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
     username: root
-    password: your-mysql-password
+    password: ${mysql_pwd}  # 或直接写入密码
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+  ai:
+    # 阿里云通义千问配置
+    dashscope:
+      api-key: ${DASHSCOPE_API_KEY}
+
+    # OpenAI 配置（可选）
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      base-url: https://api.openai.com
 ```
 
 3. **创建数据库**
@@ -103,7 +119,7 @@ curl -X POST http://localhost:8080/user/login \
 
 连接地址：`ws://localhost:8080/ws?token={JWT_TOKEN}`
 
-发送消息：
+发送消息示例：
 ```json
 {
   "type": "chat",
@@ -115,31 +131,98 @@ curl -X POST http://localhost:8080/user/login \
 }
 ```
 
+返回消息示例（流式响应）：
+```json
+{
+  "type": "chat",
+  "formType": "assistant",
+  "content": "你好！我是",
+  "time": "2025-10-24 10:00:01",
+  "msgType": "text"
+}
+```
+
+## API 文档
+
+### 用户认证 API
+
+#### 用户注册
+```http
+POST /user/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "password123",
+  "email": "test@example.com"
+}
+```
+
+#### 用户登录
+```http
+POST /user/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "password123"
+}
+```
+
+响应：
+```json
+{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiJ9...",
+    "userId": "123",
+    "username": "testuser"
+  }
+}
+```
+
+### WebSocket 消息格式
+
+所有 WebSocket 消息都需要包含 `type` 字段用于路由。
+
+#### 聊天消息（type: "chat"）
+```json
+{
+  "type": "chat",
+  "from": "userId",
+  "to": "ai",
+  "content": "用户消息内容",
+  "time": "2025-10-24 10:00:00",
+  "msgType": "text"
+}
+```
+
 ## 架构概览
 
 ```
 ┌─────────────────┐
-│   认证拦截层    │  ← JWT身份验证
+│   认证拦截层    │  ← JWT身份验证 (JwtAuthenticationInterceptor)
 └────────┬────────┘
          │
 ┌────────▼────────┐
-│  权限校验层     │  ← RBAC权限检查
+│  权限校验层     │  ← RBAC权限检查 (PermissionAspect)
 └────────┬────────┘
          │
 ┌────────▼────────┐
-│  WebSocket 层   │  ← 客户端连接
+│  WebSocket 层   │  ← 客户端连接 (WebSocketHandler)
 └────────┬────────┘
          │
 ┌────────▼────────┐
-│  消息路由层     │  ← 自动分发消息
+│  消息路由层     │  ← 自动分发消息 (MessageRouter)
 └────────┬────────┘
          │
 ┌────────▼────────┐
-│  业务处理层     │  ← MessageHandler 实现
+│  业务处理层     │  ← MessageHandler 实现 (ChatService等)
 └────────┬────────┘
          │
 ┌────────▼────────┐
-│   AI 模型层     │  ← 多模型支持
+│   AI 模型层     │  ← 多模型支持 (ChatModelFactory)
 └─────────────────┘
 ```
 
@@ -149,7 +232,7 @@ curl -X POST http://localhost:8080/user/login \
 
 ## 核心模块
 
-### 1. Communication Module (通信模块)
+### 1. WebSocket Communication Module (WebSocket 通信模块)
 
 WebSocket 通信模块提供实时双向通信能力。
 
@@ -187,7 +270,7 @@ public class CustomService implements MessageHandler {
 
 消息实体需继承 [BaseMessage](src/main/java/fun/aiboot/websocket/domain/BaseMessage.java)，参考 [ChatMessage](src/main/java/fun/aiboot/websocket/domain/ChatMessage.java)。
 
-完整实现参考 [ChatService.java](src/main/java/fun/aiboot/services/ChatService.java)
+完整实现参考 [ChatService.java](src/main/java/fun/aiboot/servicews/ChatService.java)
 
 ### 2. Dialogue LLM Module (对话 AI 模块)
 
@@ -196,8 +279,8 @@ public class CustomService implements MessageHandler {
 **核心组件**：
 - `ChatModelFactory` - 工厂模式创建 AI 模型实例
 - `ModelFrameworkType` - 支持的模型类型枚举
-- `ToolsGlobalRegistry` - 全局工具注册表
-- `GlobalFunction` - 工具调用接口
+- `GlobalToolRegistry` - 全局工具注册表
+- `GlobalTool` - 工具调用接口
 
 **支持的模型**：
 - 阿里云通义千问 (Dashscope)
@@ -219,11 +302,11 @@ stream.subscribe(chunk -> System.out.print(chunk));
 
 #### 工具调用 (Function Calling)
 
-实现 `GlobalFunction` 接口创建自定义工具：
+实现 `GlobalTool` 接口创建自定义工具：
 
 ```java
 @Component
-public class WeatherFunction implements GlobalFunction {
+public class WeatherTool implements GlobalTool {
     @Override
     public ToolCallback getFunctionCallTool() {
         return ToolCallback.from(
@@ -233,13 +316,18 @@ public class WeatherFunction implements GlobalFunction {
         );
     }
 
+    @Override
+    public String getPermission() {
+        return "weather-tool";
+    }
+
     public String getWeather(String city) {
         return "晴天，25°C";
     }
 }
 ```
 
-工具会自动注册，AI 可在对话中智能调用。
+工具会自动注册到 `GlobalToolRegistry`，AI 可在对话中智能调用。
 
 ### 3. Security Module (安全模块)
 
@@ -282,8 +370,10 @@ public class UserController {
 
 **核心服务**：
 - `UserService` - 用户服务，处理用户注册、登录、密码管理等
+- `AuthService` - 认证服务，处理用户身份验证和Token生成
 - `ChatService` - 聊天服务，处理对话消息并集成 AI 模型
 - `PermissionService` - 权限服务，处理角色和工具权限管理
+- `ModelServices` - 模型服务，管理AI模型配置
 
 ## 技术栈
 
@@ -309,37 +399,42 @@ ai-boot/
 │   └── table.SQL                          # 数据库表结构
 ├── src/main/java/fun/aiboot/
 │   ├── AiBootApplication.java             # 应用入口
-│   ├── annotation/                        # 权限注解
-│   ├── aspect/                            # 权限校验切面
-│   ├── common/                            # 通用类
-│   ├── config/                            # 配置类
-│   ├── context/                           # 用户上下文
-│   ├── controller/                        # 控制器
-│   ├── entity/                            # 实体类
-│   ├── exception/                         # 异常处理
-│   ├── interceptor/                       # 拦截器
-│   ├── mapper/                            # Mapper接口
-│   ├── service/                           # 业务服务接口
-│   │   └── impl/                          # 业务服务实现
-│   ├── communication/                     # 通信模块
-│   │   ├── config/                        # WebSocket配置
-│   │   ├── domain/                        # 消息实体
-│   │   ├── interceptor/                   # WebSocket拦截器
-│   │   └── server/                        # WebSocket服务端实现
+│   ├── common/                            # 通用模块
+│   │   ├── annotation/                    # 权限注解（@RequireRole, @RequireTool）
+│   │   ├── aspect/                        # 权限校验切面
+│   │   ├── context/                       # 用户上下文
+│   │   ├── exception/                     # 异常定义与全局异常处理
+│   │   ├── initialize/                    # 初始化组件
+│   │   └── interceptor/                   # 拦截器（JWT认证等）
+│   ├── config/                            # 配置类（密码加密、WebMVC等）
+│   ├── controller/                        # REST控制器
 │   ├── dialogue/llm/                      # AI对话模块
-│   │   ├── config/                        # 对话配置
-│   │   ├── factory/                       # 模型工厂
+│   │   ├── config/                        # 对话配置（记忆、模型配置）
+│   │   ├── context/                       # 对话上下文管理
 │   │   ├── impl/                          # LLM服务实现
-│   │   ├── memory/                        # 对话记忆
-│   │   ├── providers/                     # 模型提供者
-│   │   └── tool/                          # 工具调用
-│   └── utils/                             # 工具类
+│   │   ├── model/                         # 模型工厂
+│   │   ├── persona/                       # 人设提供者
+│   │   ├── providers/                     # 模型提供者（Dashscope, OpenAI）
+│   │   └── tool/                          # 工具调用（GlobalTool接口）
+│   ├── entity/                            # 实体类
+│   ├── mapper/                            # MyBatis Mapper接口
+│   ├── service/                           # 基础业务服务接口
+│   │   └── impl/                          # 基础业务服务实现
+│   ├── services/                          # 高级业务服务（Auth, Permission）
+│   │   └── impl/                          # 高级业务服务实现
+│   ├── servicews/                         # WebSocket业务服务（ChatService）
+│   ├── utils/                             # 工具类（JWT, AES加密等）
+│   └── websocket/                         # WebSocket通信模块
+│       ├── config/                        # WebSocket配置
+│       ├── domain/                        # 消息实体
+│       └── server/                        # WebSocket服务端实现
 ├── src/main/resources/
 │   ├── application.yaml                   # 应用配置
 │   └── application.properties             # 应用配置（备用）
 ├── src/test/java/fun/aiboot/              # 测试代码
 ├── TECHNICAL_DOCUMENTATION.md             # 技术文档
 ├── SECURITY_IMPLEMENTATION.md             # 安全实现说明
+├── Permission.md                          # 权限系统说明
 ├── README.md                              # 项目说明
 └── pom.xml                                # Maven 配置
 ```
@@ -347,6 +442,8 @@ ai-boot/
 ## 文档
 
 - **[技术文档](TECHNICAL_DOCUMENTATION.md)** - 详细的架构设计、API 说明、开发指南
+- **[安全实现说明](SECURITY_IMPLEMENTATION.md)** - 安全机制和加密说明
+- **[权限系统说明](Permission.md)** - RBAC权限系统详解
 - **[快速开始](#快速开始)** - 安装与配置指南
 - **[核心模块](#核心模块)** - 模块功能说明
 
@@ -360,6 +457,15 @@ ai-boot/
 - **教育辅导系统** - 智能答疑和学习辅助
 - **技术支持系统** - 自动化技术问题解答
 
+## 最近更新
+
+### v0.0.1-SNAPSHOT (2025-11)
+- 重构工具调用管理逻辑，优化 GlobalTool 架构
+- 重构工具调用模块包结构和类名
+- 增强对话日志记录与 WebSocket 连接关闭信息
+- 优化日志记录级别和内容
+- 完善权限系统和安全机制
+
 ## 路线图
 
 - [x] WebSocket 通信模块
@@ -372,12 +478,94 @@ ai-boot/
 - [x] OpenAI 模型集成
 - [x] 对话历史管理
 - [x] 消息持久化
-- [ ] 多轮对话上下文
+- [x] 工具调用权限管理
+- [ ] 多轮对话上下文优化
+- [ ] 上下文总结精简提高对话连贯性
+- [ ] RAG数据库支持（向量数据库集成）
+- [ ] Function 函数映射入库
 - [ ] 集群部署支持
 - [ ] 更丰富的权限控制策略
 - [ ] 审计日志功能
-- [ ] RAG数据库支持
 - [ ] 后台管理系统
+- [ ] WebUI 管理界面
+
+## 常见问题
+
+### 如何添加自定义工具？
+
+实现 `GlobalTool` 接口并添加 `@Component` 注解即可自动注册：
+
+```java
+@Component
+public class MyCustomTool implements GlobalTool {
+    @Override
+    public ToolCallback getFunctionCallTool() {
+        return ToolCallback.from(
+            "my_tool",
+            "工具描述",
+            this::myToolMethod
+        );
+    }
+
+    @Override
+    public String getPermission() {
+        return "my-custom-tool";
+    }
+
+    public String myToolMethod(String param) {
+        // 工具实现
+        return "result";
+    }
+}
+```
+
+### 如何切换 AI 模型？
+
+在调用 LLM 服务时指定模型类型：
+
+```java
+// 使用通义千问
+llmService.stream(userId, "dashscope", content);
+
+// 使用 OpenAI
+llmService.stream(userId, "openai", content);
+```
+
+### 如何自定义消息类型？
+
+1. 创建继承 `BaseMessage` 的消息类
+2. 实现 `MessageHandler` 接口处理该消息
+3. 系统会自动注册并路由
+
+```java
+@Service
+public class MyMessageHandler implements MessageHandler {
+    @Override
+    public String getType() {
+        return "my-type";
+    }
+
+    @Override
+    public void handleMessage(String userId, BaseMessage message) {
+        // 处理逻辑
+    }
+}
+```
+
+### WebSocket 连接失败怎么办？
+
+1. 确认 JWT Token 是否有效
+2. 检查 Token 是否通过查询参数 `?token=xxx` 传递
+3. 查看服务端日志确认拦截器是否通过
+4. 确认 WebSocket 端点 `/ws` 是否正确
+
+### 如何管理用户权限？
+
+系统使用 RBAC 模型，可以通过以下方式控制权限：
+
+1. **角色权限**：使用 `@RequireRole("admin")` 注解
+2. **工具权限**：使用 `@RequireTool("tool-name")` 注解
+3. 在数据库中配置用户-角色和角色-工具的映射关系
 
 ## 贡献
 
@@ -388,5 +576,15 @@ ai-boot/
 3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
 4. 推送到分支 (`git push origin feature/AmazingFeature`)
 5. 开启 Pull Request
+
+## 联系方式
+
+如有问题或建议，欢迎通过以下方式联系：
+
+- 提交 Issue
+- 发起 Pull Request
+- 邮件联系项目维护者
+
+---
 
 **Built with ❤️ using Spring Boot and Spring AI**
