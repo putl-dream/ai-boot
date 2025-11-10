@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.TableId;
 import java.io.Serializable;
+
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -18,6 +20,7 @@ import lombok.experimental.Accessors;
  * @author putl
  * @since 2025-11-05
  */
+@Builder
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)

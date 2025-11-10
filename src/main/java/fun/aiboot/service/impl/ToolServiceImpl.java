@@ -1,5 +1,6 @@
 package fun.aiboot.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import fun.aiboot.entity.Tool;
 import fun.aiboot.mapper.ToolMapper;
@@ -17,4 +18,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class ToolServiceImpl extends ServiceImpl<ToolMapper, Tool> implements ToolService {
 
+    @Override
+    public boolean isEmpty(String name) {
+        return count(Wrappers.lambdaQuery(Tool.class).eq(Tool::getName, name)) == 0;
+    }
 }

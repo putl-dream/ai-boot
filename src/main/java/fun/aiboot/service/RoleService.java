@@ -13,4 +13,6 @@ import fun.aiboot.entity.Role;
  */
 public interface RoleService extends IService<Role> {
 
+    Role getByName(String name);
+
 }

@@ -1,6 +1,8 @@
 package fun.aiboot.servicews;
 
 import fun.aiboot.dialogue.llm.LLMService;
+import fun.aiboot.entity.ModelRole;
+import fun.aiboot.services.PermissionService;
 import fun.aiboot.websocket.domain.BaseMessage;
 import fun.aiboot.websocket.domain.ChatMessage;
 import fun.aiboot.websocket.domain.FormType;
@@ -21,6 +23,8 @@ public class ChatService implements MessageHandler {
     private LLMService llmService;
     @Resource
     private MessagePublisher messagePublisher;
+    @Resource
+    private PermissionService permissionService;
 
     @Override
     public String getType() {
@@ -35,7 +39,8 @@ public class ChatService implements MessageHandler {
         String messageId = UUID.randomUUID().toString();
 
         // 调用大模型服务
-        Flux<String> stream = llmService.stream(userId, "default", userMsg.getContent());
+        ModelRole modelRole = permissionService.getModelRoleByUserId(userId);
+        Flux<String> stream = llmService.stream(userId, modelRole.getId(), userMsg.getContent());
 
         // 启动流订阅（异步执行）
         stream

@@ -13,4 +13,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ToolService extends IService<Tool> {
 
+    /**
+     * 判断工具是否存在
+     * @param name 工具名称
+     * @return true:不存在 false:存在
+     */
+    boolean isEmpty(String name);
 }

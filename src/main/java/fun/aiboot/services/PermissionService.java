@@ -2,6 +2,7 @@ package fun.aiboot.services;
 
 import fun.aiboot.dialogue.llm.config.LlmModelConfiguration;
 import fun.aiboot.entity.Model;
+import fun.aiboot.entity.ModelRole;
 
 import java.util.List;
 
@@ -71,8 +72,17 @@ public interface PermissionService {
     Model getModelById(String userId, String modelId);
 
     /**
-     * 获取模型信息
+     * 获取用户默认模型信息
+     *
      * @param userId 用户ID
+     * @return 模型信息
+     */
+    ModelRole getModelRoleByUserId(String userId);
+
+    /**
+     * 获取模型信息
+     *
+     * @param userId    用户ID
      * @param modelName 模型名称
      * @return 模型信息
      */

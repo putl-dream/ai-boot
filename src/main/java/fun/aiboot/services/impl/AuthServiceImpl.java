@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import fun.aiboot.common.context.UserContext;
 import fun.aiboot.common.exception.BusinessException;
 import fun.aiboot.entity.User;
+import fun.aiboot.service.ModelRoleService;
 import fun.aiboot.service.UserService;
 import fun.aiboot.services.AuthService;
 import fun.aiboot.services.PermissionService;
@@ -24,6 +25,7 @@ public class AuthServiceImpl implements AuthService {
     private final PermissionService permissionService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
+    private final ModelRoleService modelRoleService;
 
     @Override
     public String login(String username, String password) {
@@ -64,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void register(String username, String password, String email) {
+    public void register(String username, String password, String email, String roleName) {
         Assert.notNull(username, "username cannot be null");
         Assert.notNull(password, "password cannot be null");
         Assert.notNull(email, "email cannot be null");
@@ -80,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
                 .password(encodedPassword)
                 .email(email)
                 .model("Moonshot-Kimi-K2-Instruct")
-                .modelRole("doctor")
+                .modelRole(roleName)
                 .createTime(LocalDateTime.now())
                 .build();
 

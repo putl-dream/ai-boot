@@ -1,11 +1,10 @@
 package fun.aiboot.controller;
 
+import fun.aiboot.common.Result;
 import fun.aiboot.common.annotation.RequireRole;
 import fun.aiboot.common.annotation.RequireTool;
-import fun.aiboot.common.Result;
 import fun.aiboot.common.context.UserContextHolder;
 import fun.aiboot.entity.User;
-
 import fun.aiboot.service.UserService;
 import fun.aiboot.services.AuthService;
 import lombok.Data;
@@ -41,7 +40,7 @@ public class UserController {
      */
     @PostMapping("/register")
     public Result<String> register(@RequestBody RegisterRequest request) {
-        authService.register(request.getUsername(), request.getPassword(), request.getEmail());
+        authService.register(request.getUsername(), request.getPassword(), request.getEmail(), "ai");
         return Result.success("注册成功");
     }
 

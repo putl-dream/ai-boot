@@ -30,13 +30,8 @@ public class WebSocketConfig implements WebSocketConfigurer {
         registry.addHandler(webSocketHandler, WS_PATH)
                 .addInterceptors(webSocketAuthInterceptor)
                 .setAllowedOrigins("*");
-//                .withSockJS()
-//                .setStreamBytesLimit(512 * 1024)
-//                .setHttpMessageCacheSize(1000)
-//                .setDisconnectDelay(30_000);
 
-        log.info("===========================================================================");
-        log.info("[WebSocketConfig] WebSocket endpoint registered: {}", WS_PATH);
-        log.info("===========================================================================");
+        log.info("[ WebSocketPath ] 已注册 WebSocket 端点: {}", WS_PATH);
+        log.info("=================================[ WebSocket 初始化成功 ]==========================================");
     }
 }
