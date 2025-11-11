@@ -4,21 +4,67 @@
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring AI](https://img.shields.io/badge/Spring%20AI-1.0.0-blue.svg)](https://docs.spring.io/spring-ai/reference/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Stable-success.svg)]()
 
 一个基于 Spring Boot 和 Spring AI 构建的智能对话系统框架，提供高度可扩展、模块化的 AI 应用开发基础设施。
 集成了 JWT 身份认证、RBAC 权限管理、WebSocket 实时通信和 Function Calling 工具调用等企业级功能。
 
+> **项目状态**：核心功能已完成开发，当前处于稳定维护阶段。
+
+## 📑 目录
+
+- [核心特性](#核心特性)
+- [核心数据库设计](#核心数据库设计)
+- [快速开始](#快速开始)
+- [架构概览](#架构概览)
+- [核心模块](#核心模块)
+- [技术栈](#技术栈)
+- [项目结构](#项目结构)
+- [使用场景](#使用场景)
+- [常见问题](#常见问题)
+- [文档](#文档)
+- [路线图](#路线图)
+- [贡献](#贡献)
+
 ## 核心特性
 
-- **模块化架构** - 业务与技术分离，模块间通过接口松耦合
-- **多模型支持** - 支持阿里云通义千问、OpenAI 等多种 AI 模型
-- **WebSocket 通信** - 实时双向通信，支持流式响应
-- **工具调用** - 支持 Function Calling，扩展 AI 能力
-- **自动消息路由** - 基于类型的智能消息分发
-- **流式响应** - 实时传输 AI 响应，提升用户体验
-- **JWT 身份认证** - 基于 JWT 的安全身份验证机制
-- **RBAC 权限管理** - 基于角色和工具的细粒度权限控制
-- **全局异常处理** - 统一的异常处理和响应格式
+- **🏗️ 模块化架构** - 业务与技术分离，模块间通过接口松耦合
+- **🤖 多模型支持** - 支持阿里云通义千问、OpenAI 等多种 AI 模型
+- **⚡ WebSocket 通信** - 实时双向通信，支持流式响应
+- **🛠️ 工具调用** - 支持 Function Calling，扩展 AI 能力
+- **🔀 自动消息路由** - 基于类型的智能消息分发
+- **📡 流式响应** - 实时传输 AI 响应，提升用户体验
+- **🔐 JWT 身份认证** - 基于 JWT 的安全身份验证机制
+- **👥 RBAC 权限管理** - 基于角色和工具的细粒度权限控制
+- **🎭 人设管理** - 支持动态配置 AI 模型角色和行为
+- **🔒 数据安全** - 密码 BCrypt 加密，敏感数据 AES-GCM 加密
+- **⚠️ 全局异常处理** - 统一的异常处理和响应格式
+- **💾 数据持久化** - 完整的对话历史和消息记录
+
+## 核心数据库设计
+
+项目采用完整的 RBAC 权限模型，包含以下核心表：
+
+| 表名           | 说明      | 用途                     |
+|--------------|---------|------------------------|
+| user         | 用户表     | 存储用户基本信息、密码（BCrypt加密）  |
+| role         | 角色表     | 定义系统角色（如admin、vip等）    |
+| tool         | 工具表     | 管理 Function Calling 工具 |
+| model        | 模型表     | 配置 AI 模型（通义千问、OpenAI等） |
+| model_role   | 模型角色表   | 系统提示词/人设配置             |
+| conversation | 会话表     | 用户对话会话记录               |
+| message      | 消息表     | 对话消息详细内容               |
+| user_role    | 用户角色关联表 | 用户与角色的多对多关系            |
+| user_tool    | 用户工具关联表 | 用户直接拥有的工具权限            |
+| role_tool    | 角色工具关联表 | 角色拥有的工具权限              |
+| role_model   | 角色模型关联表 | 角色可使用的模型               |
+
+**权限设计特点**：
+
+- 用户权限 = 角色权限 + 用户直接权限
+- 支持细粒度的工具权限控制
+- 模型访问权限基于角色配置
+- 支持动态人设/提示词管理
 
 ## 快速开始
 
@@ -226,9 +272,24 @@ Content-Type: application/json
 └─────────────────┘
 ```
 
-### 设计思想
+### 核心设计理念
 
-> **业务与技术分离设计**：模块之间通过接口进行调用，模块之间相互独立，互不依赖。
+**业务与技术分离**：模块之间通过接口进行调用，模块之间相互独立，互不依赖。
+
+**权限设计特点**：
+
+- 采用 RBAC（基于角色的访问控制）+ 工具权限的混合模型
+- 用户权限 = 用户直接权限 + 用户所有角色的权限
+- 支持方法级权限控制（通过注解）
+- 支持数据级权限控制（通过服务层）
+
+**消息处理流程**：
+
+1. 客户端通过 WebSocket 发送消息
+2. WebSocketHandler 接收并验证身份
+3. MessageRouter 根据消息类型路由到对应的 MessageHandler
+4. 业务处理器调用 AI 模型生成响应
+5. 通过 MessagePublisher 将响应流式返回给客户端
 
 ## 核心模块
 
@@ -336,10 +397,24 @@ public class WeatherTool implements GlobalTool {
 **核心组件**：
 - `JwtUtil` - JWT 工具类，负责生成和解析 JWT
 - `JwtAuthenticationInterceptor` - JWT 认证拦截器
+- `WebSocketAuthInterceptor` - WebSocket 认证拦截器
 - `UserContext` - 用户上下文，存储当前登录用户信息
+- `UserContextHolder` - 用户上下文持有者，提供静态方法访问
 - `PermissionService` - 权限服务，负责权限校验
+- `PermissionAspect` - 权限校验切面，自动拦截权限注解
 - `@RequireRole` - 角色权限注解
 - `@RequireTool` - 工具权限注解
+- `AesGcmUtil` - AES-GCM 数据加密工具
+- `PasswordEncoder` - BCrypt 密码加密
+
+**认证流程**：
+
+1. 用户登录成功后获得 JWT Token
+2. 后续请求在 Header 中携带 `Authorization: Bearer {token}`
+3. 拦截器验证 Token 并提取用户信息
+4. 将用户信息存入 ThreadLocal
+5. 权限切面检查用户是否拥有所需权限
+6. 请求完成后自动清理上下文
 
 #### 使用示例
 
@@ -347,19 +422,26 @@ public class WeatherTool implements GlobalTool {
 @RestController
 @RequestMapping("/user")
 public class UserController {
-    
+
     // 需要管理员角色才能访问
     @GetMapping("/admin")
     @RequireRole("admin")
     public Result<String> adminOnly() {
         return Result.success("欢迎管理员：" + UserContextHolder.getUsername());
     }
-    
+
     // 需要特定工具权限才能访问
-    @GetMapping("/impl-test")
+    @GetMapping("/tool-test")
     @RequireTool("image-generator")
     public Result<String> toolTest() {
         return Result.success("您拥有图片生成工具权限");
+    }
+
+    // 需要多个权限（任一满足即可）
+    @GetMapping("/advanced")
+    @RequireRole(value = {"admin", "vip"}, requireAll = false)
+    public Result<String> advancedFeature() {
+        return Result.success("您拥有高级功能权限");
     }
 }
 ```
@@ -374,6 +456,23 @@ public class UserController {
 - `ChatService` - 聊天服务，处理对话消息并集成 AI 模型
 - `PermissionService` - 权限服务，处理角色和工具权限管理
 - `ModelServices` - 模型服务，管理AI模型配置
+- `ConversationService` - 会话管理服务
+- `MessageService` - 消息管理服务
+- `RoleService` - 角色管理服务
+- `ToolService` - 工具管理服务
+- `ModelRoleService` - 模型角色（人设）管理服务
+- `UserRoleService` - 用户角色关联服务
+- `UserToolService` - 用户工具关联服务
+- `RoleToolService` - 角色工具关联服务
+- `RoleModelService` - 角色模型关联服务
+
+**特色功能**：
+
+- **对话历史持久化** - 所有对话记录保存到数据库
+- **模型角色/人设管理** - 支持为不同模型配置不同的角色定位和技能描述
+- **权限继承机制** - 用户权限 = 直接权限 + 所有角色的权限
+- **数据加密** - 敏感数据使用 AES-GCM 加密存储
+- **密码安全** - 使用 BCrypt 加密，不可逆
 
 ## 技术栈
 
@@ -402,39 +501,40 @@ ai-boot/
 │   ├── common/                            # 通用模块
 │   │   ├── annotation/                    # 权限注解（@RequireRole, @RequireTool）
 │   │   ├── aspect/                        # 权限校验切面
-│   │   ├── context/                       # 用户上下文
+│   │   ├── context/                       # 用户上下文（UserContext, UserContextHolder）
 │   │   ├── exception/                     # 异常定义与全局异常处理
-│   │   ├── initialize/                    # 初始化组件
-│   │   └── interceptor/                   # 拦截器（JWT认证等）
+│   │   ├── initialize/                    # 初始化组件（MySQL初始化）
+│   │   └── interceptor/                   # 拦截器（JWT认证、WebSocket认证）
 │   ├── config/                            # 配置类（密码加密、WebMVC等）
-│   ├── controller/                        # REST控制器
+│   ├── controller/                        # REST控制器（UserController）
 │   ├── dialogue/llm/                      # AI对话模块
 │   │   ├── config/                        # 对话配置（记忆、模型配置）
 │   │   ├── context/                       # 对话上下文管理
 │   │   ├── impl/                          # LLM服务实现
-│   │   ├── model/                         # 模型工厂
+│   │   ├── model/                         # 模型工厂（ChatModelFactory）
 │   │   ├── persona/                       # 人设提供者
 │   │   ├── providers/                     # 模型提供者（Dashscope, OpenAI）
-│   │   └── tool/                          # 工具调用（GlobalTool接口）
-│   ├── entity/                            # 实体类
-│   ├── mapper/                            # MyBatis Mapper接口
+│   │   └── tool/                          # 工具调用（GlobalTool接口、工具注册表）
+│   ├── entity/                            # 实体类（11个核心表实体）
+│   ├── mapper/                            # MyBatis Mapper接口（11个Mapper）
 │   ├── service/                           # 基础业务服务接口
-│   │   └── impl/                          # 基础业务服务实现
-│   ├── services/                          # 高级业务服务（Auth, Permission）
+│   │   └── impl/                          # 基础业务服务实现（11个Service）
+│   ├── services/                          # 高级业务服务（Auth, Permission, Model）
 │   │   └── impl/                          # 高级业务服务实现
 │   ├── servicews/                         # WebSocket业务服务（ChatService）
 │   ├── utils/                             # 工具类（JWT, AES加密等）
 │   └── websocket/                         # WebSocket通信模块
 │       ├── config/                        # WebSocket配置
-│       ├── domain/                        # 消息实体
+│       ├── domain/                        # 消息实体（BaseMessage, ChatMessage等）
 │       └── server/                        # WebSocket服务端实现
 ├── src/main/resources/
 │   ├── application.yaml                   # 应用配置
 │   └── application.properties             # 应用配置（备用）
-├── src/test/java/fun/aiboot/              # 测试代码
+├── src/test/java/fun/aiboot/              # 测试代码（11个Service测试类）
 ├── TECHNICAL_DOCUMENTATION.md             # 技术文档
 ├── SECURITY_IMPLEMENTATION.md             # 安全实现说明
 ├── Permission.md                          # 权限系统说明
+├── plan.md                                # 开发计划
 ├── README.md                              # 项目说明
 └── pom.xml                                # Maven 配置
 ```
@@ -459,32 +559,45 @@ ai-boot/
 
 ## 最近更新
 
-### v0.0.1-SNAPSHOT (2025-11)
-- 重构工具调用管理逻辑，优化 GlobalTool 架构
-- 重构工具调用模块包结构和类名
-- 增强对话日志记录与 WebSocket 连接关闭信息
-- 优化日志记录级别和内容
-- 完善权限系统和安全机制
+### v0.0.1-SNAPSHOT (2025-01)
+
+- ✅ 完成基础架构设计与实现
+- ✅ 优化模型缓存与权限校验逻辑
+- ✅ 优化权限校验逻辑与模型角色处理
+- ✅ 重构工具调用管理逻辑，优化 GlobalTool 架构
+- ✅ 重构工具调用模块包结构和类名
+- ✅ 增强对话日志记录与 WebSocket 连接关闭信息
+- ✅ 优化日志记录级别和内容
+- ✅ 完善权限系统和安全机制
+- ✅ 增强用户注册功能以支持角色分配
+- ✅ 完成核心功能开发，进入稳定维护阶段
 
 ## 路线图
 
+### 已完成功能 ✅
 - [x] WebSocket 通信模块
 - [x] 阿里云通义千问集成
 - [x] 流式响应支持
 - [x] Function Calling 工具调用
 - [x] JWT 身份认证
-- [x] RBAC 权限管理
+- [x] RBAC 权限管理（角色 + 工具双重权限）
 - [x] 全局异常处理
 - [x] OpenAI 模型集成
 - [x] 对话历史管理
 - [x] 消息持久化
 - [x] 工具调用权限管理
+- [x] 模型角色/人设管理
+- [x] 用户注册与角色分配
+- [x] 密码加密（BCrypt）
+- [x] 数据加密（AES-GCM）
+
+### 规划中功能 📋
 - [ ] 多轮对话上下文优化
 - [ ] 上下文总结精简提高对话连贯性
-- [ ] RAG数据库支持（向量数据库集成）
+- [ ] RAG 数据库支持（向量数据库集成）
 - [ ] Function 函数映射入库
 - [ ] 集群部署支持
-- [ ] 更丰富的权限控制策略
+- [ ] 更丰富的权限控制策略（数据级权限）
 - [ ] 审计日志功能
 - [ ] 后台管理系统
 - [ ] WebUI 管理界面
@@ -581,9 +694,14 @@ public class MyMessageHandler implements MessageHandler {
 
 如有问题或建议，欢迎通过以下方式联系：
 
-- 提交 Issue
-- 发起 Pull Request
-- 邮件联系项目维护者
+- **提交 Issue**：[GitHub Issues](https://github.com/putl-dream/ai-boot/issues)
+- **Pull Request**：欢迎贡献代码
+- **项目主页**：[https://github.com/putl-dream/ai-boot](https://github.com/putl-dream/ai-boot)
+
+## 开发团队
+
+- 作者：putl
+- 项目维护：putl-dream
 
 ---
 
