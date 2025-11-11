@@ -3,6 +3,8 @@ package fun.aiboot.servicews;
 import fun.aiboot.common.context.UserContext;
 import fun.aiboot.dialogue.llm.LLMService;
 import fun.aiboot.entity.Model;
+import fun.aiboot.entity.ModelRole;
+import fun.aiboot.service.ModelRoleService;
 import fun.aiboot.service.ModelService;
 import fun.aiboot.services.PermissionService;
 import fun.aiboot.websocket.domain.BaseMessage;
@@ -12,6 +14,7 @@ import fun.aiboot.websocket.server.MessageHandler;
 import fun.aiboot.websocket.server.MessagePublisher;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -30,6 +33,8 @@ public class ChatService implements MessageHandler {
     private PermissionService permissionService;
     @Resource
     private ModelService modelService;
+    @Autowired
+    private ModelRoleService modelRoleService;
 
     @Override
     public String getType() {
@@ -45,13 +50,16 @@ public class ChatService implements MessageHandler {
         String messageId = UUID.randomUUID().toString();
 
         // 调用大模型服务
-
         String modelName = userContext.getCurrentModel();
         Model model = modelService.getByName(modelName);
 
+        // 获取模型角色信息
+        String modelRoleName = userContext.getCurrentModelRole();
+        ModelRole modelRole = modelRoleService.getByName(modelRoleName);
+
         // 检查权限
         permissionService.hasModelIds(userId, List.of(modelName), false);
-        Flux<String> stream = llmService.stream(userId, model.getId(), userMsg.getContent());
+        Flux<String> stream = llmService.stream(userId, modelRole.getId(), userMsg.getContent());
 
         // 启动流订阅（异步执行）
         stream

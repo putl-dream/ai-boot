@@ -78,7 +78,7 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
             // 权限校验
             boolean p1 = permissionService.hasRoleName(context.getUserId(), context.getRoleNames(), true);
             boolean p2 = permissionService.hasModelIds(context.getUserId(), context.getRoleModelIds(), true);
-            boolean p3 = permissionService.hasToolIds(context.getUserId(), context.getRoleNames(), true);
+            boolean p3 = permissionService.hasToolIds(context.getUserId(), context.getRoleToolIds(), true);
 
             if (!p1 || !p2 || !p3) {
                 log.warn("WebSocket authentication failed: user does not have permission");

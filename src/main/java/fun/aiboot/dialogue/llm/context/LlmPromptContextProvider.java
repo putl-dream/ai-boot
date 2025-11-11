@@ -16,8 +16,6 @@ public class LlmPromptContextProvider {
 
     private final ModelConfigContext modelConfigContext;
     private final DialogueContext dialogueContext;
-    private final PermissionService permissionService;
-    private final ModelService modelService;
 
     /**
      * 组合模型配置与上下文信息，生成可运行环境
@@ -27,12 +25,6 @@ public class LlmPromptContextProvider {
 
         if (llmModelConfiguration == null) {
             throw new RuntimeException("模型不存在");
-        }
-
-        Model model = modelService.getById(modelId);
-
-        if (!permissionService.hasModelIds(userId, List.of(model.getName()), false)) {
-            throw new AuthorizationException("无权访问模型");
         }
 
         return new LlmPromptContext(llmModelConfiguration, dialogueContext.getMessages(userId, 10));

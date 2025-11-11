@@ -48,23 +48,24 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(401, "用户名或密码错误");
         }
 
-        List<String> userRoleIds = userRoleService.selectNameByUserId(user.getId());
+        List<String> userRoleIds = userRoleService.selectRoleIdByUserId(user.getId());
         List<String> userRoleNames = userRoleService.selectNameByUserId(user.getId());
-        List<String> userTools = roleToolService.selectToolNameByRoleIds(userRoleIds);
-        List<String> userModels = roleModelService.selectModelNameByRoleIds(userRoleIds);
+
+        List<String> userToolIds = roleToolService.selectToolIdsByRoleIds(userRoleIds);
+        List<String> userModelIds = roleModelService.selectModelIdByIds(userRoleIds);
 
         // 生成token
         String token = JwtUtil.generateJwt(UserContext.builder()
                 .userId(user.getId())
                 .username(username)
                 .roleNames(userRoleNames)
-                .roleModelIds(userModels)
-                .roleToolIds(userTools)
+                .roleModelIds(userModelIds)
+                .roleToolIds(userToolIds)
                 .currentModel(user.getModel())
                 .currentModelRole(user.getModelRole())
                 .lastUpdated(LocalDateTime.now())
                 .build());
-        log.info("[ 用户登录成功 ] : username {}，角色：{}", username, userRoles);
+        log.info("[ 用户登录成功 ] : username {}，角色：{}", username, userRoleNames);
         return token;
     }
 
@@ -92,7 +93,6 @@ public class AuthServiceImpl implements AuthService {
         this.userService.save(newUser);
 
         // 默认赋权
-        permissionService.createDefaultRole(newUser.getId());
         log.info("[ 用户注册成功 ]：username {}", username);
     }
 

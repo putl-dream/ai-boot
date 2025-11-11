@@ -44,7 +44,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public boolean hasToolIds(@NonNull String userId, @NonNull List<String> toolIds, boolean requireAll) {
-        if (toolIds.isEmpty()) return false;
+        if (toolIds.isEmpty()) return true;
 
         List<String> roleIds = userRoleService.selectRoleIdByUserId(userId);
         List<String> userTools = roleToolService.selectToolIdsByRoleIds(roleIds);
@@ -59,7 +59,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public boolean hasToolNames(String userId, List<String> toolNames, boolean requireAll) {
-        if (toolNames.isEmpty()) return false;
+        if (toolNames.isEmpty()) return true;
 
         List<String> roleIds = userRoleService.selectRoleIdByUserId(userId);
         List<String> toolIds = roleToolService.selectToolNameByRoleIds(roleIds);

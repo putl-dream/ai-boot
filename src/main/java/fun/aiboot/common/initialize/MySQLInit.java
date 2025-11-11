@@ -31,9 +31,9 @@ public class MySQLInit {
     private final String modelName = "Moonshot-Kimi-K2-Instruct";
 
 
-    @PostConstruct
+    //    @PostConstruct
     public void init() {
-//        log.info("=================================[ 数据库初始化开始 ]==========================================");
+        log.info("=================================[ 数据库初始化开始 ]==========================================");
         // 全局工具初始化
         Map<String, Tool> allPermission = globalToolRegistry.getAllPermission();
         allPermission.values().forEach(tool -> {

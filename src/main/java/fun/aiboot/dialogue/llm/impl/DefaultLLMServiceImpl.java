@@ -10,8 +10,6 @@ import fun.aiboot.dialogue.llm.persona.PersonaProvider;
 import fun.aiboot.dialogue.llm.tool.GlobalToolRegistry;
 import fun.aiboot.service.RoleToolService;
 import fun.aiboot.service.UserRoleService;
-import fun.aiboot.service.UserToolService;
-import fun.aiboot.services.PermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -34,12 +32,10 @@ import java.util.Map;
 public class DefaultLLMServiceImpl implements LLMService {
 
     private final LlmPromptContextProvider llmPromptContextProvider;
-    private final PermissionService permissionService;
     private final PersonaProvider personaProvider;
     private final ToolCallingManager toolCallingManager;
     private final GlobalToolRegistry globalToolRegistry;
     private final DialogueContext dialogueContext;
-    private final UserToolService userToolService;
     private final UserRoleService userRoleService;
     private final RoleToolService roleToolService;
 
