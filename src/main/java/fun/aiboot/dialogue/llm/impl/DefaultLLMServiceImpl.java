@@ -2,6 +2,7 @@ package fun.aiboot.dialogue.llm.impl;
 
 
 import fun.aiboot.dialogue.llm.LLMService;
+import fun.aiboot.dialogue.llm.config.LlmModelConfiguration;
 import fun.aiboot.dialogue.llm.context.DialogueContext;
 import fun.aiboot.dialogue.llm.context.LlmPromptContext;
 import fun.aiboot.dialogue.llm.context.LlmPromptContextProvider;
@@ -25,6 +26,9 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -40,6 +44,7 @@ public class DefaultLLMServiceImpl implements LLMService {
     private final RoleToolService roleToolService;
 
     private LlmPromptContext bound;
+    private final Map<ModelCacheKey, ChatModel> modelCache = new ConcurrentHashMap<>();
 
 
     @Override
@@ -110,18 +115,33 @@ public class DefaultLLMServiceImpl implements LLMService {
         List<String> userTools = roleToolService.selectToolNameByRoleIds(roleIds);
 
         Map<String, ToolCallback> toolsByNames = globalToolRegistry.getToolsByNames(userTools);
-
-        log.info("[ 用户工具 ] 用户 {} : \n{}\n", userId, userTools);
         return toolsByNames.values().stream().toList();
     }
 
 
     private ChatModel buildModel(List<ToolCallback> toolCallbacks) {
-        return ChatModelFactory.builder()
-                .llmModelConfiguration(bound.config())
-                .toolCallbacks(toolCallbacks)
-                .toolCallingManager(toolCallingManager)
-                .build()
-                .takeChatModel();
+        LlmModelConfiguration config = bound.config();
+        Set<String> toolNames = toolCallbacks.stream()
+                .map(toolCallback -> toolCallback.getToolDefinition().name())
+                .collect(Collectors.toSet());
+        ModelCacheKey cacheKey = new ModelCacheKey(config, toolNames);
+
+        if (modelCache.containsKey(cacheKey)) {
+            log.info("[ 模型工厂 ] 获取模型实例：{} + 工具 {}", config.getModelName(), toolNames);
+            return modelCache.get(cacheKey);
+        } else {
+            ChatModel chatModel = ChatModelFactory.builder()
+                    .llmModelConfiguration(bound.config())
+                    .toolCallbacks(toolCallbacks)
+                    .toolCallingManager(toolCallingManager)
+                    .build()
+                    .takeChatModel();
+            modelCache.put(cacheKey, chatModel);
+            log.info("[ 模型工厂 ] 创建模型实例：{} + 工具 {}", config.getModelName(), toolNames);
+            return chatModel;
+        }
+    }
+
+    record ModelCacheKey(LlmModelConfiguration config, Set<String> toolNames) {
     }
 }

@@ -34,7 +34,7 @@ public class ToolServiceImpl extends ServiceImpl<ToolMapper, Tool> implements To
 
     @Override
     public List<String> getToolNameByIds(List<String> toolIds) {
-        return baseMapper.selectList(Wrappers.lambdaQuery(Tool.class).eq(Tool::getId, toolIds)
+        return baseMapper.selectList(Wrappers.lambdaQuery(Tool.class).in(Tool::getId, toolIds)
                 .select(Tool::getName)
         ).stream().map(Tool::getName).toList();
     }

@@ -19,4 +19,5 @@ public interface RoleToolService extends IService<RoleTool> {
     List<String> selectToolNameByRoleIds(@NonNull List<String> roleIds);
 
     List<String> selectToolIdsByRoleIds(List<String> roleIds);
+
 }

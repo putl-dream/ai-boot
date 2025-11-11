@@ -2,7 +2,6 @@ package fun.aiboot.servicews;
 
 import fun.aiboot.common.context.UserContext;
 import fun.aiboot.dialogue.llm.LLMService;
-import fun.aiboot.entity.Model;
 import fun.aiboot.entity.ModelRole;
 import fun.aiboot.service.ModelRoleService;
 import fun.aiboot.service.ModelService;
@@ -51,14 +50,14 @@ public class ChatService implements MessageHandler {
 
         // 调用大模型服务
         String modelName = userContext.getCurrentModel();
-        Model model = modelService.getByName(modelName);
 
         // 获取模型角色信息
         String modelRoleName = userContext.getCurrentModelRole();
         ModelRole modelRole = modelRoleService.getByName(modelRoleName);
 
         // 检查权限
-        permissionService.hasModelIds(userId, List.of(modelName), false);
+        permissionService.hasModelNames(userId, List.of(modelName), false);
+        permissionService.hasToolIds(userId, userContext.getRoleToolIds(), false);
         Flux<String> stream = llmService.stream(userId, modelRole.getId(), userMsg.getContent());
 
         // 启动流订阅（异步执行）

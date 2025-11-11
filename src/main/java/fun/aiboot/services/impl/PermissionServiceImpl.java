@@ -30,6 +30,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public boolean hasRoleName(@NonNull String userId, @NonNull List<String> roleNames, boolean requireAll) {
+        log.info("[ 用户角色鉴权 ] 用户：{} 鉴权角色 {}", userId, roleNames);
         if (roleNames.isEmpty()) return false;
 
         List<String> userRoles = userRoleService.selectNameByUserId(userId);
@@ -44,6 +45,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public boolean hasToolIds(@NonNull String userId, @NonNull List<String> toolIds, boolean requireAll) {
+        log.info("[ 工具权限鉴权 ] 用户：{} 鉴权工具 {}", userId, toolIds);
         if (toolIds.isEmpty()) return true;
 
         List<String> roleIds = userRoleService.selectRoleIdByUserId(userId);
@@ -59,6 +61,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public boolean hasToolNames(String userId, List<String> toolNames, boolean requireAll) {
+        log.info("[ 工具权限鉴权 ] 用户：{} 鉴权工具 {}", userId, toolNames);
         if (toolNames.isEmpty()) return true;
 
         List<String> roleIds = userRoleService.selectRoleIdByUserId(userId);
@@ -74,6 +77,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public boolean hasModelNames(String userId, List<String> modelNames, boolean requireAll) {
+        log.info("[ 模型权限鉴权 ] 用户：{} 鉴权模型 {}", userId, modelNames);
         if (modelNames.isEmpty()) return false;
 
         List<String> roleIds = userRoleService.selectRoleIdByUserId(userId);
@@ -89,6 +93,7 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public boolean hasModelIds(@NonNull String userId, @NonNull List<String> modelIds, boolean requireAll) {
+        log.info("[ 模型权限鉴权 ] 用户：{} 鉴权模型 {}", userId, modelIds);
         if (modelIds.isEmpty()) return false;
 
         List<String> roleIds = userRoleService.selectRoleIdByUserId(userId);

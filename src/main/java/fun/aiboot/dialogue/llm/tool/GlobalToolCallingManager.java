@@ -187,7 +187,7 @@ public class GlobalToolCallingManager implements ToolCallingManager {
                         observationContext.setToolCallResult(toolResult);
                         return toolResult;
                     });
-            log.info("工具 [{}] 调用结果: {}", toolName, toolCallResult);
+            log.info("[ 工具消息 ] 工具 [ {} ] 消息: {}", toolName, toolCallResult);
             toolResponses.add(new ToolResponseMessage.ToolResponse(toolCall.id(), toolName,
                     toolCallResult != null ? toolCallResult : ""));
         }

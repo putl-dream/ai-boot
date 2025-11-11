@@ -7,7 +7,6 @@ import fun.aiboot.entity.Model;
 import fun.aiboot.entity.ModelRole;
 import fun.aiboot.service.ModelRoleService;
 import fun.aiboot.service.ModelService;
-import fun.aiboot.service.RoleToolService;
 import fun.aiboot.services.PermissionService;
 import fun.aiboot.utils.JwtUtil;
 import fun.aiboot.websocket.server.WebSocketConstants;
@@ -15,7 +14,6 @@ import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -24,7 +22,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -36,10 +33,8 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
     private PermissionService permissionService;
     @Resource
     private ModelRoleService modelRoleService;
-    @Autowired
+    @Resource
     private ModelService modelService;
-    @Autowired
-    private RoleToolService roleToolService;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
@@ -88,7 +83,6 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
 
             ModelRole modelRole = modelRoleService.getByName(context.getCurrentModelRole());
             Model modelInfo = modelService.getByName(context.getCurrentModel());
-            List<String> userTools = roleToolService.selectToolNameByRoleIds(context.getRoleNames());
 
             modelConfigContext.save(LlmModelConfiguration.builder()
                     .id(modelRole.getId())
@@ -96,7 +90,7 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
                     .apiKey(modelInfo.getModelKey())
                     .provider(modelInfo.getProvider())
                     .roleName(modelRole.getName())
-                    .exposedTools(userTools)
+                    .exposedTools(context.getRoleToolIds())
                     .build());
 
             // 将用户信息存储到attributes中,可以跨线程使用

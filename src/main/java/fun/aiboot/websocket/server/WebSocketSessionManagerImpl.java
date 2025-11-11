@@ -32,7 +32,7 @@ public class WebSocketSessionManagerImpl implements SessionManager {
         }
         sessions.put(userId, session);
         UserContext userContext = (UserContext) session.getAttributes().get(WebSocketConstants.User_Context);
-        log.info("[ {} ] 建立 [ {} ] 会话请求成功", userContext.getUsername(), session.getAttributes().get(WebSocketConstants.Conversation_Id));
+        log.info("[ 建立会话请求 ] 用户 [ {} ] 建立 [ {} ] 会话请求成功", userContext.getUsername(), session.getAttributes().get(WebSocketConstants.Conversation_Id));
     }
 
     @Override

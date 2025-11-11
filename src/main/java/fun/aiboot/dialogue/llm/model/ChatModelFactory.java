@@ -21,7 +21,6 @@ public class ChatModelFactory {
 
     // 使用工厂模式创建模型实例，预留可扩展
     public ChatModel takeChatModel() {
-        log.info("[ 模型工厂 ] 创建模型实例：{}", llmModelConfiguration);
         return switch (llmModelConfiguration.getProvider()) {
             case "openai" -> OpenAiLlmProvider.builder()
                     .withApiKey(llmModelConfiguration.getApiKey())
