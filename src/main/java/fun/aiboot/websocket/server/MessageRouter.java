@@ -1,5 +1,7 @@
 package fun.aiboot.websocket.server;
 
+import fun.aiboot.common.context.UserContext;
+
 public interface MessageRouter {
-    void route(String userId, String rawMessage);
+    void route(UserContext userContext, String rawMessage);
 }

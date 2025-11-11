@@ -7,6 +7,8 @@ import fun.aiboot.mapper.ToolMapper;
 import fun.aiboot.service.ToolService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * <p>
  * 工具 服务实现类
@@ -21,5 +23,19 @@ public class ToolServiceImpl extends ServiceImpl<ToolMapper, Tool> implements To
     @Override
     public boolean isEmpty(String name) {
         return count(Wrappers.lambdaQuery(Tool.class).eq(Tool::getName, name)) == 0;
+    }
+
+    @Override
+    public List<Tool> getByIds(List<String> toolIds) {
+        return baseMapper.selectList(Wrappers.lambdaQuery(Tool.class)
+                .in(Tool::getId, toolIds)
+        );
+    }
+
+    @Override
+    public List<String> getToolNameByIds(List<String> toolIds) {
+        return baseMapper.selectList(Wrappers.lambdaQuery(Tool.class).eq(Tool::getId, toolIds)
+                .select(Tool::getName)
+        ).stream().map(Tool::getName).toList();
     }
 }

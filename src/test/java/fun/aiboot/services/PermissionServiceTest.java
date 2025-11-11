@@ -40,35 +40,35 @@ class PermissionServiceTest {
     }
 
     @Test
-    void hasRole_EmptyRoleList_ReturnsTrue() {
+    void hasRole_EmptyRoleNameList_ReturnsTrue() {
         // Given
         String userId = "user1";
         List<String> roleNames = List.of();
         boolean requireAll = true;
 
         // When
-        boolean result = permissionService.hasRole(userId, roleNames, requireAll);
+        boolean result = permissionService.hasRoleName(userId, roleNames, requireAll);
 
         // Then
         assertTrue(result);
     }
 
     @Test
-    void hasRole_NullRoleList_ReturnsTrue() {
+    void hasRole_NullRoleNameList_ReturnsTrue() {
         // Given
         String userId = "user1";
         List<String> roleNames = null;
         boolean requireAll = true;
 
         // When
-        boolean result = permissionService.hasRole(userId, roleNames, requireAll);
+        boolean result = permissionService.hasRoleName(userId, roleNames, requireAll);
 
         // Then
         assertTrue(result);
     }
 
     @Test
-    void hasRole_RequireAllAndHasAllRoles_ReturnsTrue() {
+    void hasRole_RequireAllAndHasAllRoles_ReturnsTrueName() {
         // Given
         String userId = "user1";
         List<String> roleNames = List.of("admin", "user");
@@ -95,7 +95,7 @@ class PermissionServiceTest {
         when(roleMapper.selectBatchIds(anyList())).thenReturn(List.of(role1, role2));
 
         // When
-        boolean result = permissionService.hasRole(userId, roleNames, requireAll);
+        boolean result = permissionService.hasRoleName(userId, roleNames, requireAll);
 
         // Then
         assertTrue(result);
@@ -104,7 +104,7 @@ class PermissionServiceTest {
     }
 
     @Test
-    void hasRole_RequireAllButMissingRole_ReturnsFalse() {
+    void hasRole_RequireAllButMissingRole_Name_ReturnsFalse() {
         // Given
         String userId = "user1";
         List<String> roleNames = List.of("admin", "user", "moderator");
@@ -131,14 +131,14 @@ class PermissionServiceTest {
         when(roleMapper.selectBatchIds(anyList())).thenReturn(List.of(role1, role2));
 
         // When
-        boolean result = permissionService.hasRole(userId, roleNames, requireAll);
+        boolean result = permissionService.hasRoleName(userId, roleNames, requireAll);
 
         // Then
         assertFalse(result);
     }
 
     @Test
-    void hasRole_NotRequireAllAndHasOneRole_ReturnsTrue() {
+    void hasRole_NotRequireAllAndHasOneRole_Name_ReturnsTrue() {
         // Given
         String userId = "user1";
         List<String> roleNames = List.of("admin", "moderator");
@@ -157,14 +157,14 @@ class PermissionServiceTest {
         when(roleMapper.selectBatchIds(anyList())).thenReturn(List.of(role));
 
         // When
-        boolean result = permissionService.hasRole(userId, roleNames, requireAll);
+        boolean result = permissionService.hasRoleName(userId, roleNames, requireAll);
 
         // Then
         assertTrue(result);
     }
 
     @Test
-    void hasRole_NotRequireAllAndHasNoMatchingRole_ReturnsFalse() {
+    void hasRole_NotRequireAllAndHasNoMatchingRole_Name_ReturnsFalse() {
         // Given
         String userId = "user1";
         List<String> roleNames = List.of("moderator", "superuser");
@@ -183,42 +183,42 @@ class PermissionServiceTest {
         when(roleMapper.selectBatchIds(anyList())).thenReturn(List.of(role));
 
         // When
-        boolean result = permissionService.hasRole(userId, roleNames, requireAll);
+        boolean result = permissionService.hasRoleName(userId, roleNames, requireAll);
 
         // Then
         assertFalse(result);
     }
 
     @Test
-    void hasTool_EmptyToolList_ReturnsTrue() {
+    void hasTool_EmptyToolNameList_ReturnsTrue() {
         // Given
         String userId = "user1";
         List<String> toolNames = List.of();
         boolean requireAll = true;
 
         // When
-        boolean result = permissionService.hasTool(userId, toolNames, requireAll);
+        boolean result = permissionService.hasToolIds(userId, toolNames, requireAll);
 
         // Then
         assertTrue(result);
     }
 
     @Test
-    void hasTool_NullToolList_ReturnsTrue() {
+    void hasTool_NullToolNameList_ReturnsTrue() {
         // Given
         String userId = "user1";
         List<String> toolNames = null;
         boolean requireAll = true;
 
         // When
-        boolean result = permissionService.hasTool(userId, toolNames, requireAll);
+        boolean result = permissionService.hasToolIds(userId, toolNames, requireAll);
 
         // Then
         assertTrue(result);
     }
 
     @Test
-    void hasTool_RequireAllAndHasAllTools_ReturnsTrue() {
+    void hasTool_RequireAllAndHasAllTools_ReturnsTrueName() {
         // Given
         String userId = "user1";
         List<String> toolNames = List.of("tool1", "tool2");
@@ -251,7 +251,7 @@ class PermissionServiceTest {
         when(toolMapper.selectBatchIds(anyList())).thenReturn(List.of(tool1, tool2));
 
         // When
-        boolean result = permissionService.hasTool(userId, toolNames, requireAll);
+        boolean result = permissionService.hasToolIds(userId, toolNames, requireAll);
 
         // Then
         assertTrue(result);
@@ -262,7 +262,7 @@ class PermissionServiceTest {
     }
 
     @Test
-    void hasTool_RequireAllButMissingTool_ReturnsFalse() {
+    void hasTool_RequireAllButMissingTool_Name_ReturnsFalse() {
         // Given
         String userId = "user1";
         List<String> toolNames = List.of("tool1", "tool2", "tool3");
@@ -295,14 +295,14 @@ class PermissionServiceTest {
         when(toolMapper.selectBatchIds(anyList())).thenReturn(List.of(tool1, tool2));
 
         // When
-        boolean result = permissionService.hasTool(userId, toolNames, requireAll);
+        boolean result = permissionService.hasToolIds(userId, toolNames, requireAll);
 
         // Then
         assertFalse(result);
     }
 
     @Test
-    void hasTool_NotRequireAllAndHasOneTool_ReturnsTrue() {
+    void hasTool_NotRequireAllAndHasOneTool_Name_ReturnsTrue() {
         // Given
         String userId = "user1";
         List<String> toolNames = List.of("tool2", "tool3");
@@ -335,14 +335,14 @@ class PermissionServiceTest {
         when(toolMapper.selectBatchIds(anyList())).thenReturn(List.of(tool1, tool2));
 
         // When
-        boolean result = permissionService.hasTool(userId, toolNames, requireAll);
+        boolean result = permissionService.hasToolIds(userId, toolNames, requireAll);
 
         // Then
         assertTrue(result);
     }
 
     @Test
-    void hasTool_NotRequireAllAndHasNoMatchingTool_ReturnsFalse() {
+    void hasTool_NotRequireAllAndHasNoMatchingTool_Name_ReturnsFalse() {
         // Given
         String userId = "user1";
         List<String> toolNames = List.of("tool3", "tool4");
@@ -375,7 +375,7 @@ class PermissionServiceTest {
         when(toolMapper.selectBatchIds(anyList())).thenReturn(List.of(tool1, tool2));
 
         // When
-        boolean result = permissionService.hasTool(userId, toolNames, requireAll);
+        boolean result = permissionService.hasToolIds(userId, toolNames, requireAll);
 
         // Then
         assertFalse(result);

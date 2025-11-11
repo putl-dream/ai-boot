@@ -21,7 +21,7 @@ public class UserContext {
     private String username;
 
     // 角色权限（静态部分）
-    private List<String> roles;
+    private List<String> roleNames;
     private List<String> roleModelIds;
     private List<String> roleToolIds;
 

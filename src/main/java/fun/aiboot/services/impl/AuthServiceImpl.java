@@ -4,8 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import fun.aiboot.common.context.UserContext;
 import fun.aiboot.common.exception.BusinessException;
 import fun.aiboot.entity.User;
-import fun.aiboot.service.ModelRoleService;
-import fun.aiboot.service.UserService;
+import fun.aiboot.service.*;
 import fun.aiboot.services.AuthService;
 import fun.aiboot.services.PermissionService;
 import fun.aiboot.utils.JwtUtil;
@@ -26,6 +25,9 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
     private final ModelRoleService modelRoleService;
+    private final UserRoleService userRoleService;
+    private final RoleToolService roleToolService;
+    private final RoleModelService roleModelService;
 
     @Override
     public String login(String username, String password) {
@@ -46,15 +48,16 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(401, "用户名或密码错误");
         }
 
-        List<String> userRoles = permissionService.getRoleNames(user.getId());
-        List<String> userTools = permissionService.getUserTools(user.getId());
-        List<String> userModels = permissionService.getModelIdsByUserId(user.getId());
+        List<String> userRoleIds = userRoleService.selectNameByUserId(user.getId());
+        List<String> userRoleNames = userRoleService.selectNameByUserId(user.getId());
+        List<String> userTools = roleToolService.selectToolNameByRoleIds(userRoleIds);
+        List<String> userModels = roleModelService.selectModelNameByRoleIds(userRoleIds);
 
         // 生成token
         String token = JwtUtil.generateJwt(UserContext.builder()
                 .userId(user.getId())
                 .username(username)
-                .roles(userRoles)
+                .roleNames(userRoleNames)
                 .roleModelIds(userModels)
                 .roleToolIds(userTools)
                 .currentModel(user.getModel())

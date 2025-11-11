@@ -31,7 +31,7 @@ public class UserContextHolder {
 
     public static List<String> getRoles() {
         UserContext context = get();
-        return context == null ? null : context.getRoles();
+        return context == null ? null : context.getRoleNames();
     }
 
     public static List<String> getRoleModelIds() {

@@ -3,6 +3,8 @@ package fun.aiboot.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import fun.aiboot.entity.Model;
 
+import java.util.List;
+
 /**
  * <p>
  * 服务类
@@ -19,4 +21,12 @@ public interface ModelService extends IService<Model> {
      * @return 模型
      */
     Model getByName(String name);
+
+    /**
+     * 根据ID列表查询模型
+     *
+     * @param ids ID列表
+     * @return 模型列表
+     */
+    List<String> getNameByIds(List<String> ids);
 }

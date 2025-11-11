@@ -55,7 +55,7 @@ public class PermissionAspect {
         log.debug("检查用户 {} 的角色权限：{}, requireAll={}", userId, Arrays.toString(roleNames), requireAll);
 
         // 检查权限
-        boolean hasPermission = permissionService.hasRole(userId, Arrays.asList(roleNames), requireAll);
+        boolean hasPermission = permissionService.hasRoleName(userId, Arrays.asList(roleNames), requireAll);
 
         if (!hasPermission) {
             String message = requireAll
@@ -91,7 +91,7 @@ public class PermissionAspect {
         log.debug("检查用户 {} 的工具权限：{}, requireAll={}", userId, Arrays.toString(toolNames), requireAll);
 
         // 检查权限
-        boolean hasPermission = permissionService.hasTool(userId, Arrays.asList(toolNames), requireAll);
+        boolean hasPermission = permissionService.hasModelNames(userId, Arrays.asList(toolNames), requireAll);
 
         if (!hasPermission) {
             String message = requireAll

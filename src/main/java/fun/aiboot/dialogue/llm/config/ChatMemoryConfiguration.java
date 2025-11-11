@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @RequiredArgsConstructor
-public class ChatMemoryConfig {
+public class ChatMemoryConfiguration {
 
     private final MessageMapper messageMapper;
     private final SessionManager sessionManager;

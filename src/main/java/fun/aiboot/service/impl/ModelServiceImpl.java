@@ -7,6 +7,8 @@ import fun.aiboot.mapper.ModelMapper;
 import fun.aiboot.service.ModelService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务实现类
@@ -21,5 +23,14 @@ public class ModelServiceImpl extends ServiceImpl<ModelMapper, Model> implements
     @Override
     public Model getByName(String name) {
         return this.getOne(Wrappers.lambdaQuery(Model.class).eq(Model::getName, name));
+    }
+
+    @Override
+    public List<String> getNameByIds(List<String> ids) {
+        return baseMapper.selectList(Wrappers.lambdaQuery(Model.class)
+                        .select(Model::getName)
+                        .in(Model::getId, ids)
+                ).stream().map(Model::getName)
+                .toList();
     }
 }

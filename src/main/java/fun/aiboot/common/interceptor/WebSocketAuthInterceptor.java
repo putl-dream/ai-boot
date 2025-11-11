@@ -6,6 +6,8 @@ import fun.aiboot.dialogue.llm.context.ModelConfigContext;
 import fun.aiboot.entity.Model;
 import fun.aiboot.entity.ModelRole;
 import fun.aiboot.service.ModelRoleService;
+import fun.aiboot.service.ModelService;
+import fun.aiboot.service.RoleToolService;
 import fun.aiboot.services.PermissionService;
 import fun.aiboot.utils.JwtUtil;
 import fun.aiboot.websocket.server.WebSocketConstants;
@@ -13,6 +15,7 @@ import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -33,6 +36,10 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
     private PermissionService permissionService;
     @Resource
     private ModelRoleService modelRoleService;
+    @Autowired
+    private ModelService modelService;
+    @Autowired
+    private RoleToolService roleToolService;
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
@@ -68,9 +75,20 @@ public class WebSocketAuthInterceptor implements HandshakeInterceptor {
                 return false;
             }
 
+            // 权限校验
+            boolean p1 = permissionService.hasRoleName(context.getUserId(), context.getRoleNames(), true);
+            boolean p2 = permissionService.hasModelIds(context.getUserId(), context.getRoleModelIds(), true);
+            boolean p3 = permissionService.hasToolIds(context.getUserId(), context.getRoleNames(), true);
+
+            if (!p1 || !p2 || !p3) {
+                log.warn("WebSocket authentication failed: user does not have permission");
+                response.setStatusCode(HttpStatusCode.valueOf(403));
+                return false;
+            }
+
             ModelRole modelRole = modelRoleService.getByName(context.getCurrentModelRole());
-            Model modelInfo = permissionService.getModelByModelName(context.getUserId(), context.getCurrentModel());
-            List<String> userTools = permissionService.getUserTools(context.getUserId());
+            Model modelInfo = modelService.getByName(context.getCurrentModel());
+            List<String> userTools = roleToolService.selectToolNameByRoleIds(context.getRoleNames());
 
             modelConfigContext.save(LlmModelConfiguration.builder()
                     .id(modelRole.getId())

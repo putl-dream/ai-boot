@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
@@ -46,7 +45,7 @@ public class JwtAuthenticationInterceptor implements HandlerInterceptor {
             // 将用户信息存储到ThreadLocal中
             UserContextHolder.set(userContext);
 
-            log.debug("[ 用户赋权成功 ]：角色={}，支持模型{}", userContext.getRoles(), userContext.getRoleModelIds());
+            log.debug("[ 用户赋权成功 ]：角色={}，支持模型{}", userContext.getRoleNames(), userContext.getRoleModelIds());
             return true;
         } catch (Exception e) {
             log.error("token解析失败：{}", e.getMessage());

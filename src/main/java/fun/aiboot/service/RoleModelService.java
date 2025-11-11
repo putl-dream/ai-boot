@@ -1,7 +1,7 @@
 package fun.aiboot.service;
 
-import fun.aiboot.entity.RoleModel;
 import com.baomidou.mybatisplus.extension.service.IService;
+import fun.aiboot.entity.RoleModel;
 
 import java.util.List;
 
@@ -15,5 +15,28 @@ import java.util.List;
  */
 public interface RoleModelService extends IService<RoleModel> {
 
+    /**
+     * 根据角色ID列表获取模型
+     *
+     * @param roleIds 角色ID列表
+     * @return 模型列表
+     */
     List<RoleModel> selectByRoleIds(List<String> roleIds);
+
+    /**
+     * 根据角色ID列表获取模型ID
+     *
+     * @param roleIds 角色ID列表
+     * @return 模型ID列表
+     */
+    List<String> selectModelIdByIds(List<String> roleIds);
+
+
+    /**
+     * 根据角色ID列表获取模型名称
+     *
+     * @param roleIds 角色ID列表
+     * @return 模型名称列表
+     */
+    List<String> selectModelNameByRoleIds(List<String> roleIds);
 }

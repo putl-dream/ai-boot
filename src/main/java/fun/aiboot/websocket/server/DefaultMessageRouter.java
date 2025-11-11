@@ -1,6 +1,7 @@
 package fun.aiboot.websocket.server;
 
 import com.alibaba.fastjson2.JSON;
+import fun.aiboot.common.context.UserContext;
 import fun.aiboot.websocket.domain.BaseMessage;
 import fun.aiboot.websocket.domain.ChatMessage;
 import fun.aiboot.websocket.domain.FormType;
@@ -27,7 +28,7 @@ public class DefaultMessageRouter implements MessageRouter {
     }
 
     @Override
-    public void route(String userId, String rawMessage) {
+    public void route(UserContext userContext, String rawMessage) {
         try {
             // 解析消息结构
             if (rawMessage.equals("ping")) {
@@ -44,11 +45,11 @@ public class DefaultMessageRouter implements MessageRouter {
                 return;
             }
 
-            handler.handleMessage(userId, base);
+            handler.handleMessage(userContext, base);
         } catch (Exception e) {
             log.error("处理消息时发生错误: {}", e.getMessage(), e);
             ChatMessage errorMsg = ChatMessage.successEnd(FormType.SYSTEM, "生成响应时出现错误：" + e.getMessage());
-            messagePublisher.sendToUser(userId, errorMsg);
+            messagePublisher.sendToUser(userContext.getUserId(), errorMsg);
         }
     }
 }

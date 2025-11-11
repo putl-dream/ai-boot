@@ -38,14 +38,14 @@ public class WebSocketHandler extends AbstractWebSocketHandler {
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         log.debug("接收到文本消息：\n{}", message.getPayload());
         UserContext userContext = (UserContext) session.getAttributes().get("userContext");
-        messageRouter.route(userContext.getUserId(), message.getPayload());
+        messageRouter.route(userContext, message.getPayload());
     }
 
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
         log.debug("接收到二进制消息：{}", message.getPayload());
         UserContext userContext = (UserContext) session.getAttributes().get("userContext");
-        messageRouter.route(userContext.getUserId(), message.getPayload().toString());
+        messageRouter.route(userContext, message.getPayload().toString());
     }
 
     @Override

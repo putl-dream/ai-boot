@@ -3,6 +3,8 @@ package fun.aiboot.service;
 import fun.aiboot.entity.Tool;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  * 工具 服务类
@@ -19,4 +21,10 @@ public interface ToolService extends IService<Tool> {
      * @return true:不存在 false:存在
      */
     boolean isEmpty(String name);
+
+
+    List<Tool> getByIds(List<String> toolIds);
+
+
+    List<String> getToolNameByIds(List<String> toolIds);
 }

@@ -1,6 +1,7 @@
 package fun.aiboot.websocket.server;
 
 
+import fun.aiboot.common.context.UserContext;
 import fun.aiboot.websocket.domain.BaseMessage;
 
 public interface MessageHandler {
@@ -14,5 +15,5 @@ public interface MessageHandler {
     /**
      * 处理消息
      */
-    void handleMessage(String userId, BaseMessage message);
+    void handleMessage(UserContext userContext, BaseMessage message);
 }

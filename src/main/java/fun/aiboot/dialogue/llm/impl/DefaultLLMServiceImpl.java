@@ -8,6 +8,9 @@ import fun.aiboot.dialogue.llm.context.LlmPromptContextProvider;
 import fun.aiboot.dialogue.llm.model.ChatModelFactory;
 import fun.aiboot.dialogue.llm.persona.PersonaProvider;
 import fun.aiboot.dialogue.llm.tool.GlobalToolRegistry;
+import fun.aiboot.service.RoleToolService;
+import fun.aiboot.service.UserRoleService;
+import fun.aiboot.service.UserToolService;
 import fun.aiboot.services.PermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +39,9 @@ public class DefaultLLMServiceImpl implements LLMService {
     private final ToolCallingManager toolCallingManager;
     private final GlobalToolRegistry globalToolRegistry;
     private final DialogueContext dialogueContext;
+    private final UserToolService userToolService;
+    private final UserRoleService userRoleService;
+    private final RoleToolService roleToolService;
 
     private LlmPromptContext bound;
 
@@ -104,10 +110,12 @@ public class DefaultLLMServiceImpl implements LLMService {
     }
 
     private List<ToolCallback> buildToolCallbacks(String userId) {
-        List<String> userTools = permissionService.getUserTools(userId);
-        log.info("[ 用户工具 ] 用户 {} : \n{}\n", userId, userTools);
+        List<String> roleIds = userRoleService.selectRoleIdByUserId(userId);
+        List<String> userTools = roleToolService.selectToolNameByRoleIds(roleIds);
 
         Map<String, ToolCallback> toolsByNames = globalToolRegistry.getToolsByNames(userTools);
+
+        log.info("[ 用户工具 ] 用户 {} : \n{}\n", userId, userTools);
         return toolsByNames.values().stream().toList();
     }
 

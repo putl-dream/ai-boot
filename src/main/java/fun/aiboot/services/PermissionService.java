@@ -1,9 +1,5 @@
 package fun.aiboot.services;
 
-import fun.aiboot.dialogue.llm.config.LlmModelConfiguration;
-import fun.aiboot.entity.Model;
-import fun.aiboot.entity.ModelRole;
-
 import java.util.List;
 
 /**
@@ -14,11 +10,6 @@ import java.util.List;
  */
 public interface PermissionService {
     /**
-     * 用户创建默认角色和工具权限
-     */
-    void createDefaultRole(String userId);
-
-    /**
      * 检查用户是否拥有指定角色
      *
      * @param userId     用户ID
@@ -26,7 +17,37 @@ public interface PermissionService {
      * @param requireAll 是否需要拥有所有角色
      * @return 是否有权限
      */
-    boolean hasRole(String userId, List<String> roleNames, boolean requireAll);
+    boolean hasRoleName(String userId, List<String> roleNames, boolean requireAll);
+
+    /**
+     * 检查用户是否拥有指定工具权限
+     *
+     * @param userId     用户ID
+     * @param toolIds    工具Id列表
+     * @param requireAll 是否需要拥有所有工具权限
+     * @return 是否有权限
+     */
+    boolean hasToolIds(String userId, List<String> toolIds, boolean requireAll);
+
+    /**
+     * 检查用户是否拥有指定工具权限
+     *
+     * @param userId 用户ID
+     *               模型名称列表
+     *               是否需要所有模型可访问
+     * @return 是否有权限
+     */
+    boolean hasModelNames(String userId, List<String> modelNames, boolean requireAll);
+
+    /**
+     * 检查模型是否可访问
+     *
+     * @param userId     用户ID
+     * @param modelIds   模型Id列表
+     * @param requireAll 是否需要所有模型可访问
+     * @return 是否可访问
+     */
+    boolean hasModelIds(String userId, List<String> modelIds, boolean requireAll);
 
     /**
      * 检查用户是否拥有指定工具权限
@@ -36,57 +57,5 @@ public interface PermissionService {
      * @param requireAll 是否需要拥有所有工具权限
      * @return 是否有权限
      */
-    boolean hasTool(String userId, List<String> toolNames, boolean requireAll);
-
-    /**
-     * 获取用户的所有角色名称
-     *
-     * @param userId 用户ID
-     * @return 角色名称列表
-     */
-    List<String> getRoleNames(String userId);
-
-    /**
-     * 获取用户的所有工具名称
-     *
-     * @param userId 用户ID
-     * @return 工具名称列表
-     */
-    List<String> getUserTools(String userId);
-
-    /**
-     * 获取用户所有角色的模型ID列表
-     *
-     * @param userId 用户ID
-     * @return 模型ID列表
-     */
-    List<String> getModelIdsByUserId(String userId);
-
-    /**
-     * 获取模型信息
-     *
-     * @param userId  用户ID
-     * @param modelId 模型ID
-     * @return 模型信息
-     */
-    Model getModelById(String userId, String modelId);
-
-    /**
-     * 获取用户默认模型信息
-     *
-     * @param userId 用户ID
-     * @return 模型信息
-     */
-    ModelRole getModelRoleByUserId(String userId);
-
-    /**
-     * 获取模型信息
-     *
-     * @param userId    用户ID
-     * @param modelName 模型名称
-     * @return 模型信息
-     */
-    Model getModelByModelName(String userId, String modelName);
-
-    boolean canAccessModel(String userId, LlmModelConfiguration config);
+    boolean hasToolNames(String userId, List<String> toolNames, boolean requireAll);
 }

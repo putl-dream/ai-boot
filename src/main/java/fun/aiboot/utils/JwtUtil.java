@@ -29,7 +29,7 @@ public class JwtUtil {
      * @return
      */
     public static String generateJwt(UserContext userContext) {
-        log.info("{} 生成JWT令牌：{}", userContext.getUsername(), userContext.getRoles());
+        log.info("{} 生成JWT令牌：{}", userContext.getUsername(), userContext.getRoleNames());
         Map<String, Object> map = JSON.parseObject(JSON.toJSONString(userContext), Map.class);
         return Jwts.builder()
                 .addClaims(map)
