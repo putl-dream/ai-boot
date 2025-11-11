@@ -4,12 +4,14 @@ import fun.aiboot.dialogue.llm.config.LlmModelConfiguration;
 import fun.aiboot.dialogue.llm.providers.DashscopeLlmProvider;
 import fun.aiboot.dialogue.llm.providers.OpenAiLlmProvider;
 import lombok.Builder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.tool.ToolCallback;
 
 import java.util.List;
 
+@Slf4j
 @Builder
 public class ChatModelFactory {
 
@@ -19,6 +21,7 @@ public class ChatModelFactory {
 
     // 使用工厂模式创建模型实例，预留可扩展
     public ChatModel takeChatModel() {
+        log.info("[ 模型工厂 ] 创建模型实例：{}", llmModelConfiguration);
         return switch (llmModelConfiguration.getProvider()) {
             case "openai" -> OpenAiLlmProvider.builder()
                     .withApiKey(llmModelConfiguration.getApiKey())

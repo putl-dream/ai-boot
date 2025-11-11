@@ -52,7 +52,6 @@ public class DefaultLLMServiceImpl implements LLMService {
 
     @Override
     public Flux<String> stream(String userId, String modelId, String message) {
-        log.info("[ 用户消息 ] 用户 {} : \n{}\n", userId, message);
         dialogueContext.addMessage(userId, new UserMessage(message));
 
         Prompt prompt = buildPrompt(userId, modelId, message);
@@ -83,18 +82,11 @@ public class DefaultLLMServiceImpl implements LLMService {
 
 
     private Prompt buildPrompt(String userId, String modelId, String message) {
+        log.info("[ 用户消息 ] 用户 {} : \n{}\n", userId, message);
         /*
          * 通过模型上下文绑定器得到  绑定上下文
          */
         bound = llmPromptContextProvider.bind(userId, modelId);
-
-        /*
-         * 根据上下文校验模型权限
-         */
-
-        if (!permissionService.canAccessModel(userId, bound.config())) {
-            throw new SecurityException("no access to model");
-        }
 
         /*
          * 添加角色上下文，构建系统提示词
@@ -113,6 +105,7 @@ public class DefaultLLMServiceImpl implements LLMService {
 
     private List<ToolCallback> buildToolCallbacks(String userId) {
         List<String> userTools = permissionService.getUserTools(userId);
+        log.info("[ 用户工具 ] 用户 {} : \n{}\n", userId, userTools);
 
         Map<String, ToolCallback> toolsByNames = globalToolRegistry.getToolsByNames(userTools);
         return toolsByNames.values().stream().toList();

@@ -17,6 +17,8 @@ public class LlmPromptContextProvider {
     public LlmPromptContext bind(String userId, String modelId) {
         final LlmModelConfiguration llmModelConfiguration = modelConfigContext.get(modelId);
 
+        // todo 权限校验 ，移动到这里
+
         return new LlmPromptContext(llmModelConfiguration, dialogueContext.getMessages(userId, 10));
     }
 }

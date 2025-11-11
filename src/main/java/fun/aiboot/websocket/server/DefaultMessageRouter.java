@@ -23,7 +23,6 @@ public class DefaultMessageRouter implements MessageRouter {
 
     @Autowired
     public DefaultMessageRouter(List<MessageHandler> handlerList) {
-        // 自动收集所有实现 MessageHandler 的 Bean
         handlerList.forEach(handler -> handlers.put(handler.getType(), handler));
     }
 
