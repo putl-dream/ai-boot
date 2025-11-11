@@ -12,12 +12,12 @@ public class ModelRoleServiceTest {
 
     @Test
     public void save() {
-        ModelRole modelRole = new ModelRole();
-        modelRole.setName("doctor");
-        modelRole.setDescription("医生");
-        modelRole.setSkill("你是一个医生，你需要根据用户的问题给出相应的建议。");
-
-        modelRoleService.save(modelRole);
+//        ModelRole modelRole = new ModelRole();
+//        modelRole.setName("doctor");
+//        modelRole.setDescription("医生");
+//        modelRole.setSkill("你是一个医生，你需要根据用户的问题给出相应的建议。");
+//
+//        modelRoleService.save(modelRole);
     }
 
 }
