@@ -1,10 +1,10 @@
 # AI-Boot
 
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Spring AI](https://img.shields.io/badge/Spring%20AI-1.0.0-blue.svg)](https://docs.spring.io/spring-ai/reference/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Stable-success.svg)]()
+[![Spring Boot   春天的引导](https://img.shields.io/badge/Spring%20Boot-3.5.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Spring AI   春季人工智能](https://img.shields.io/badge/Spring%20AI-1.0.0-blue.svg)](https://docs.spring.io/spring-ai/reference/)
+[![License   许可证](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Status   状态](https://img.shields.io/badge/Status-Stable-success.svg)]()
 
 一个基于 Spring Boot 和 Spring AI 构建的智能对话系统框架，提供高度可扩展、模块化的 AI 应用开发基础设施。
 集成了 JWT 身份认证、RBAC 权限管理、WebSocket 实时通信和 Function Calling 工具调用等企业级功能。
